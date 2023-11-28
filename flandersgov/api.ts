@@ -11,8 +11,7 @@ import { signContent } from "../packaging/createSignedPackage";
 
 async function run() {
 
-    const govid = 'http://localhost:3456/flandersgov/id'
-    const govdata = 'http://localhost:3456/flandersgov/data/'
+    const govid = `http://localhost:${port}/flandersgov/id`
 
     let keypair = await crypto.subtle.generateKey(
         {
@@ -72,11 +71,11 @@ async function run() {
         console.log(
 `Running government birthdate API system
 
-identity document:
-http://localhost:3456/flandersgov/id
+identity document URI:
+${govid}
 
-birthdate endpoint call:
-http://localhost:3456/flandersgov/endpoint/dob?id=<webid>`
+birthdate endpoint URI:
+http://localhost:${port}/flandersgov/endpoint/dob?id=<webid>`
         )
     })
 
