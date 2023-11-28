@@ -20,16 +20,16 @@ const headers = `
  * 
  * @param {string} path // Path of file to package
  * @param {Object} options 
- * @param {string} options.packagedBy // Actor responsible for the packaging
- * @param {string} options.packagedFrom // Origin of the packaged data
- * @param {string} options.duration // Duration for which the receiving actor can use the data, takes a XSD duration
- * @param {string} options.purpose // Purpose of the packaging - Usage Policy, takes a URL input of the purpos
- * @param {string} options.documentUri // URI of the document -- TODO:: remove this and make inverse relation
- * @param {string} options.contentType // content type of the content
- * @param {string} options.shape // Shape of the content
- * @param {Object} options.sign // Signature of the content
- * @param {string} options.sign.signature // Signature value
- * @param {string} options.sign.issuer // Issuer of the signature
+ * @param {string=} options.packagedBy // Actor responsible for the packaging
+ * @param {string=} options.packagedFrom // Origin of the packaged data
+ * @param {string=} options.duration // Duration for which the receiving actor can use the data, takes a XSD duration
+ * @param {string=} options.purpose // Purpose of the packaging - Usage Policy, takes a URL input of the purpos
+ * @param {string=} options.documentUri // URI of the document -- TODO:: remove this and make inverse relation
+ * @param {string=} options.contentType // content type of the content
+ * @param {string=} options.shape // Shape of the content
+ * @param {Object=} options.sign // Signature of the content
+ * @param {string=} options.sign.signature // Signature value
+ * @param {string=} options.sign.issuer // Issuer of the signature
  * 
  * @returns 
  */
@@ -56,16 +56,16 @@ exports.packageFileContent = async function packageFileContent(path, options) {
  * 
  * @param {string} content // content to be packaged
  * @param {Object} options 
- * @param {string} options.packagedBy // Actor responsible for the packaging
- * @param {string} options.packagedFrom // Origin of the packaged data
- * @param {string} options.duration // Duration for which the receiving actor can use the data, takes a XSD duration
- * @param {string} options.purpose // Purpose of the packaging - Usage Policy, takes a URL input of the purpos
- * @param {string} options.documentUri // URI of the document -- TODO:: remove this and make inverse relation
- * @param {string} options.contentType // content type of the content
- * @param {string} options.shape // Shape of the content
- * @param {Object} options.sign // Signature of the content
- * @param {string} options.sign.signature // Signature value
- * @param {string} options.sign.issuer // Issuer of the signature
+ * @param {string=} options.packagedBy // Actor responsible for the packaging
+ * @param {string=} options.packagedFrom // Origin of the packaged data
+ * @param {string=} options.duration // Duration for which the receiving actor can use the data, takes a XSD duration
+ * @param {string=} options.purpose // Purpose of the packaging - Usage Policy, takes a URL input of the purpos
+ * @param {string=} options.documentUri // URI of the document -- TODO:: remove this and make inverse relation
+ * @param {string=} options.contentType // content type of the content
+ * @param {string=} options.shape // Shape of the content
+ * @param {Object=} options.sign // Signature of the content
+ * @param {string=} options.sign.signature // Signature value
+ * @param {string=} options.sign.issuer // Issuer of the signature
  * 
  * @returns 
  */
@@ -78,16 +78,16 @@ exports.packageContent = function packageContent(content, options) {
  * 
  * @param {*} lines 
  * @param {*} options 
- * @param {string} options.packagedBy // Actor responsible for the packaging
- * @param {string} options.packagedFrom // Origin of the packaged data
- * @param {string} options.duration // Duration for which the receiving actor can use the data, takes a XSD duration
- * @param {string} options.purpose // Purpose of the packaging - Usage Policy, takes a URL input of the purpos
- * @param {string} options.documentUri // URI of the document -- TODO:: remove this and make inverse relation
- * @param {string} options.contentType // content type of the content
- * @param {string} options.shape // Shape of the content
- * @param {Object} options.sign // Signature of the content
- * @param {string} options.sign.signature // Signature value
- * @param {string} options.sign.issuer // Issuer of the signature
+ * @param {string=} options.packagedBy // Actor responsible for the packaging
+ * @param {string=} options.packagedFrom // Origin of the packaged data
+ * @param {string=} options.duration // Duration for which the receiving actor can use the data, takes a XSD duration
+ * @param {string=} options.purpose // Purpose of the packaging - Usage Policy, takes a URL input of the purpos
+ * @param {string=} options.documentUri // URI of the document -- TODO:: remove this and make inverse relation
+ * @param {string=} options.contentType // content type of the content
+ * @param {string=} options.shape // Shape of the content
+ * @param {Object=} options.sign // Signature of the content
+ * @param {string=} options.sign.signature // Signature value
+ * @param {string=} options.sign.issuer // Issuer of the signature
  */
 function processContent(lines, options) {
     parsingPrefixes = true;
@@ -173,7 +173,6 @@ ${spacing}${singleSpacing}dcterms:description "Data Usage Policy" ;
 ${spacing}${singleSpacing}dcterms:issued "${new Date().toISOString()}"^^xsd:dateTime ;
 ${spacing}${singleSpacing}odrl:permission [
 ${spacing}${doubleSpacing}odrl:action odrl:use ;
-${spacing}${doubleSpacing}odrl:target <${options.documentUri}> ;
 ${constraints.join(';\n')};\n
 ${spacing}${singleSpacing}];
 ${spacing}]`    

@@ -2,6 +2,9 @@ const express = require('express')
 const app = express()
 const port = 3123
 
+//@ts-ignore
+import * as pack from "../packaging/package"
+
 import * as n3  from 'n3';
 
 import * as crypto from 'crypto';
@@ -9,6 +12,10 @@ import * as crypto from 'crypto';
 import { signContent } from "../packaging/createSignedPackage";
 
 const createGovernmentEndpointRequest = async (webId: string) => await (await fetch(`http://localhost:3456/flandersgov/endpoint/dob?id=${webId}`)).text()
+
+app.use(express.text({
+  type: ['text/n3', 'text/turtle', 'text/plain']
+}));
 
 
 
@@ -22,12 +29,6 @@ async function run() {
 
     const webid = `http://localhost:${port}/${name}/id`
     const endpoint = `http://localhost:${port}/${name}/endpoint`
-
-
-    // Prefetching government data
-
-    let bdatePackage = await createGovernmentEndpointRequest(webid);
-    console.log('data', bdatePackage)
 
 
     // Create keypair for the data pod
@@ -56,12 +57,24 @@ async function run() {
 
     //@ts-ignore
     app.post(`/${name}/endpoint`, async (req, res) => {
-        let body = req.query.id
-        console.log(body)
+        let body = req.body
+        console.log("request body", body)
 
+        // Prefetching government data
+
+        let bdatePackage = await createGovernmentEndpointRequest(webid);
+        console.log('data', bdatePackage)
+
+        // let signedPackage = await signContent(bdatePackage, webid, keypair.privateKey)
+
+        let packagedBdate = pack.packageContent(bdatePackage, {
+            packagedBy: webid,
+            packagedFrom: endpoint,
+            purpose: "https://gdpr.org/purposes/Research",
+        })
         
-        let content = "Hello World \n"
-        res.send(content)
+        // let content = "Hello World \n"
+        res.send(packagedBdate)
     })
 
 
