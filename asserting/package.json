@@ -1,0 +1,23 @@
+{
+  "name": "vienna-dialogue-hacking",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@rdfjs/express-handler": "^2.0.0",
+    "@types/n3": "^1.16.4",
+    "express": "^4.18.2",
+    "eyereasoner": "^10.7.2",
+    "n3": "^1.17.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/rdfjs__express-handler": "^2.0.4"
+  }
+}
