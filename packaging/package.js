@@ -100,7 +100,7 @@ function processContent(lines, options) {
         } 
         
         if (parsingPrefixes) prefixString += line + `\n`
-        else contentsString += tripleSpacing + singleSpacing + line + `\n`
+        else contentsString += tripleSpacing + line + `\n`
     }
     
     prefixString += `\n${headers}\n`
@@ -114,20 +114,19 @@ function processContent(lines, options) {
     let result =
 `${prefixes.sort().join('\n').trim()}
 [] pack:packages {
-${doubleSpacing}[]
-${tripleSpacing}pack:content {
+${singleSpacing}[] pack:content {
 ${contentsString.trimEnd()}
-${tripleSpacing}};
+${doubleSpacing}};
 `
     result +=
         [].concat(
-            addProvenance(options, tripleSpacing)
+            addProvenance(options, doubleSpacing)
         ).concat(
-            addSignature(options, tripleSpacing)
+            addSignature(options, doubleSpacing)
         ).concat(
-            addPolicy(options, tripleSpacing)
+            addPolicy(options, doubleSpacing)
         ).concat(
-            addContentDescription(options, tripleSpacing)
+            addContentDescription(options, doubleSpacing)
         ).join(`;\n`) + ".\n"   
         options
     result += `}.`

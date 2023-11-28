@@ -1,13 +1,10 @@
 //@ts-ignore
 import * as pack from "./package"
 
-
 import { n3reasoner } from 'eyereasoner';
 
 import * as n3  from 'n3';
 import * as rdf from 'rdf-js';
-// The definition of "Quads" is:
-// export type Quads = rdf.Quad[] | Set<rdf.Quad>; 
 import {RDFC10, Quads } from 'rdfjs-c14n';
 
 import * as crypto from 'crypto';
@@ -44,8 +41,6 @@ async function packageContent(content: string) {
         duration: "P1M",
         purpose: "https://gdpr.org/purposes/Research"
     })
-
-    console.log(provenancePackage)
 
     let signedPackage = pack.packageContent(provenancePackage, {
         sign: {
