@@ -195,7 +195,7 @@ function addSignature(options, spacing) {
 ${spacing}${singleSpacing}a sign:Signature;
 ${spacing}${singleSpacing}sign:issuer <${options.sign.issuer}>;
 ${spacing}${singleSpacing}sign:created "${new Date().toISOString()}"^^xsd:dateTime;
-${spacing}${singleSpacing}sign:proofValue: "${options.sign.signature}";
+${spacing}${singleSpacing}sign:proofValue "${options.sign.signature}";
 ${spacing}]`
         return [signBody]
     }
