@@ -34,7 +34,7 @@ async function run() {
         let bdateTriple = n3.DataFactory.quad(
             n3.DataFactory.namedNode(id), 
             n3.DataFactory.namedNode("https://www.w3.org/2006/vcard/ns#bday"), 
-            n3.DataFactory.literal(new Date('2000-01-01T10:00:00').toISOString(), new n3.NamedNode("http://www.w3.org/2001/XMLSchema#dateTime"))
+            n3.DataFactory.literal(new Date('2000-01-01T10:00:00').toISOString(), n3.DataFactory.namedNode("http://www.w3.org/2001/XMLSchema#dateTime"))
         );
 
         let tripleString : string = await new Promise((resolve, reject) => {

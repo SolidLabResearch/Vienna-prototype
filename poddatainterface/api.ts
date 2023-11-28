@@ -8,7 +8,8 @@ import * as crypto from 'crypto';
 
 import { signContent } from "../packaging/createSignedPackage";
 
-const createGovernmentEndpointRequest = async (webId) => await (await fetch(`http://localhost:${port}/flandersgov/endpoint/dob?id=${webId}`)).text()
+const createGovernmentEndpointRequest = async (webId: string) => await (await fetch(`http://localhost:3456/flandersgov/endpoint/dob?id=${webId}`)).text()
+
 
 
 async function run() {
@@ -17,8 +18,19 @@ async function run() {
 
     name = name || "bob"
 
+    let tripleStore = new n3.Store();
+
     const webid = `http://localhost:${port}/${name}/id`
     const endpoint = `http://localhost:${port}/${name}/endpoint`
+
+
+    // Prefetching government data
+
+    let bdatePackage = await createGovernmentEndpointRequest(webid);
+    console.log('data', bdatePackage)
+
+
+    // Create keypair for the data pod
 
     let keypair = await crypto.subtle.generateKey(
         {
@@ -32,9 +44,13 @@ async function run() {
     let publicKeyRaw = await crypto.subtle.exportKey("raw", keypair.publicKey)
     let publicKeyString = Buffer.from(publicKeyRaw).toString('base64')
 
+    // The Dialog endpoint, a get request will trigger an error
 
     //@ts-ignore
     app.get(`/${name}/endpoint`, async (req, res) => {
+
+        res.status(400)
+
         res.send("Please do a POST request to this endpoint with the dialog message as body")
     })
 
@@ -74,6 +90,8 @@ Dialog endpoint URI:
 ${endpoint}`
         )
     })
+
+
 
 }
 
