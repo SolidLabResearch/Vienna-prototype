@@ -40,8 +40,7 @@ function n3toQuadArray(message: string) {
     return parsed
 }
 
-async function signDataGraph (input: rdf.Quad[], privateKey: crypto.webcrypto.CryptoKey) {
-
+async function hashDataGraph(input: rdf.Quad[]) {
     // Any implementation of the data factory will do in the call below.
     // By default, the Data Factory of the `n3` package (i.e., the argument in the call
     // below is not strictly necessary).
@@ -53,15 +52,19 @@ async function signDataGraph (input: rdf.Quad[], privateKey: crypto.webcrypto.Cr
     const normalized: Quads = (await rdfc10.c14n(input)).canonicalized_dataset;
 
     // If you care only of the N-Quads results only, you can make it simpler
-    const normalized_N_Quads: string = (await rdfc10.c14n(input)).canonical_form;
+    // const normalized_N_Quads: string = (await rdfc10.c14n(input)).canonical_form;
 
     // Or even simpler, using a shortcut:
-    const normalized_N_Quads_bis: string = await rdfc10.canonicalize(input);
+    // const normalized_N_Quads_bis: string = await rdfc10.canonicalize(input);
 
     // "hash" is the hash value of the canonical dataset, per specification
     const hash: string = await rdfc10.hash(normalized);
 
-    let signature = await sign(privateKey, new TextEncoder().encode(hash))
+    return new TextEncoder().encode(hash);
+}
+
+async function signDataGraph(input: rdf.Quad[], privateKey: crypto.webcrypto.CryptoKey) {
+    let signature = await sign(privateKey, await hashDataGraph(input));
 
     // console.log('signature', signature)
 
@@ -74,7 +77,9 @@ async function signDataGraph (input: rdf.Quad[], privateKey: crypto.webcrypto.Cr
     return signature
 }
 
-
+export async function verifyDataGraph(input: rdf.Quad[], signature: ArrayBuffer, publicKey: crypto.webcrypto.CryptoKey) {
+    return verify(publicKey, signature, await hashDataGraph(input))
+}
 
 const generateKeyPair = async function() {
     return crypto.subtle.generateKey(
@@ -94,7 +99,7 @@ const sign = async function(privateKey: crypto.webcrypto.CryptoKey, buffer: cryp
     }, privateKey, buffer);
 };
 
-const verify = async function(publicKey: crypto.webcrypto.CryptoKey, signature: ArrayBuffer, data: crypto.webcrypto.BufferSource) {
+export const verify = async function(publicKey: crypto.webcrypto.CryptoKey, signature: ArrayBuffer, data: crypto.webcrypto.BufferSource) {
     return crypto.subtle.verify({
       name: 'ECDSA',
       hash: 'SHA-512'
