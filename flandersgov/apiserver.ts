@@ -25,7 +25,6 @@ async function run() {
 
     let publicKeyRaw = await crypto.subtle.exportKey("raw", keypair.publicKey)
     let publicKeyString = Buffer.from(publicKeyRaw).toString('base64')
-    console.log(publicKeyString)
 
     //@ts-ignore
     app.get('/flandersgov/endpoint/dob', async (req, res) => {
@@ -63,16 +62,22 @@ async function run() {
 <${govid}> a foaf:PublicInstance;
     foaf:name "Flanders Government"@en;
     foaf:homepage <https://www.vlaanderen.be>;
-    <http> [
-
-    ] .
+    <http://www.w3.org/ns/auth/cert#key>  "${publicKeyString}".
 `
         res.send(webId)
     })
 
 
     app.listen(port, () => {
-        console.log(`Example app listening on port ${port}`)
+        console.log(
+`Running government birthdate API system
+
+identity document:
+http://localhost:3456/flandersgov/id
+
+birthdate endpoint call:
+http://localhost:3456/flandersgov/endpoint/dob?id=<webid>`
+        )
     })
 
 }
