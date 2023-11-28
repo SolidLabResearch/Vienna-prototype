@@ -128,8 +128,7 @@ ${doubleSpacing}};
         ).concat(
             addContentDescription(options, doubleSpacing)
         ).join(`;\n`) + ".\n"   
-        options
-    result += `}.`
+    result += `}.\n`
     return(result)
 }
 
@@ -169,11 +168,9 @@ ${spacing}${doubleSpacing}]`)
 
     let policyBody =
 `${spacing}policy:hasContentPolicy [
-${spacing}${singleSpacing}a policy:Policy;
 ${spacing}${singleSpacing}dcterms:creator <${options.packagedBy}> ;
 ${spacing}${singleSpacing}dcterms:description "Data Usage Policy" ;
 ${spacing}${singleSpacing}dcterms:issued "${new Date().toISOString()}"^^xsd:dateTime ;
-${spacing}${singleSpacing}a odrl:Agreement ;
 ${spacing}${singleSpacing}odrl:permission [
 ${spacing}${doubleSpacing}odrl:action odrl:use ;
 ${spacing}${doubleSpacing}odrl:target <${options.documentUri}> ;

@@ -17,11 +17,10 @@ let content = `
 `
 
 
-async function packageContent(content: string) {
-    let keypair = await generateKeyPair();
+export async function packageAndSignContent(content: string, issuer: string, privateKey: crypto.webcrypto.CryptoKey, packageOptions: any) {
 
     let quadArray = await n3toQuadArray(content)
-    let signature = await signDataGraph(quadArray)
+    let signature = await signDataGraph(quadArray, privateKey)
    
     let signatureString = Buffer.from(signature).toString('base64') 
 
@@ -32,39 +31,38 @@ async function packageContent(content: string) {
     // console.log('privateKey', privateKeyJWK)
     // console.log('publicKey', publicKeyJWK)
 
-    let userId = 'https://user.id'
 
-    let provenancePackage = pack.packageContent(content, {
-        packagedBy: userId,
-        packagedFrom: 'https://user.data',
-        documentUri: 'https://user.data',
-        duration: "P1M",
-        purpose: "https://gdpr.org/purposes/Research"
-    })
+    let provenancePackage = pack.packageContent(content, packageOptions)
 
     let signedPackage = pack.packageContent(provenancePackage, {
         sign: {
             signature: signatureString,
-            issuer: userId,
+            issuer: issuer,
         },
     })
 
-    console.log(signedPackage)
+    return (signedPackage)
 
-//  * @param {string} content // content to be packaged
-//     * @param {Object} options 
-//     * @param {string} options.packagedBy // Actor responsible for the packaging
-//     * @param {string} options.packagedFrom // Origin of the packaged data
-//     * @param {string} options.duration // Duration for which the receiving actor can use the data, takes a XSD duration
-//     * @param {string} options.purpose // Purpose of the packaging - Usage Policy, takes a URL input of the purpos
-//     * @param {string} options.documentUri // URI of the document -- TODO:: remove this and make inverse relation
-//     * @param {string} options.contentType // content type of the content
-//     * @param {string} options.shape // Shape of the content
-//     * @param {Object} options.sign // Signature of the content
-//     * @param {string} options.sign.signature // Signature value
-//     * @param {string} options.sign.issuer // Issuer of the signature
-//     * 
-    
+}
+
+
+
+export async function signContent(content: string, issuer: string, privateKey: crypto.webcrypto.CryptoKey) {
+
+    let quadArray = await n3toQuadArray(content)
+    let signature = await signDataGraph(quadArray, privateKey)
+   
+    let signatureString = Buffer.from(signature).toString('base64') 
+
+    let signedPackage = pack.packageContent(content, {
+        sign: {
+            signature: signatureString,
+            issuer: issuer,
+        },
+    })
+
+    return (signedPackage)
+
 }
 
 
@@ -79,7 +77,7 @@ function n3toQuadArray(message: string) {
     return parsed
 }
 
-async function signDataGraph (input: rdf.Quad[]) {
+async function signDataGraph (input: rdf.Quad[], privateKey: crypto.webcrypto.CryptoKey) {
 
     // Any implementation of the data factory will do in the call below.
     // By default, the Data Factory of the `n3` package (i.e., the argument in the call
@@ -100,11 +98,7 @@ async function signDataGraph (input: rdf.Quad[]) {
     // "hash" is the hash value of the canonical dataset, per specification
     const hash: string = await rdfc10.hash(normalized);
 
-
-
-    let keypair = await generateKeyPair()
-
-    let signature = await sign(keypair.privateKey, new TextEncoder().encode(hash))
+    let signature = await sign(privateKey, new TextEncoder().encode(hash))
 
     // console.log('signature', signature)
 
@@ -149,4 +143,4 @@ const verify = async function(publicKey: crypto.webcrypto.CryptoKey, signature: 
 
 
 
-packageContent(content)
+// packageAndSignContent(content, )
