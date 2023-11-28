@@ -16,37 +16,6 @@ let content = `
 <https://pod.rubendedecker.be/profile/card#me> <http://www.w3.org/2006/vcard/ns#bday> "2000-01-01T10:00:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
 `
 
-
-export async function packageAndSignContent(content: string, issuer: string, privateKey: crypto.webcrypto.CryptoKey, packageOptions: any) {
-
-    let quadArray = await n3toQuadArray(content)
-    let signature = await signDataGraph(quadArray, privateKey)
-   
-    let signatureString = Buffer.from(signature).toString('base64') 
-
-
-    // let privateKeyJWK = await crypto.subtle.exportKey("jwk", keypair.privateKey)
-    // let publicKeyJWK = await crypto.subtle.exportKey("jwk", keypair.publicKey)
-    
-    // console.log('privateKey', privateKeyJWK)
-    // console.log('publicKey', publicKeyJWK)
-
-
-    let provenancePackage = pack.packageContent(content, packageOptions)
-
-    let signedPackage = pack.packageContent(provenancePackage, {
-        sign: {
-            signature: signatureString,
-            issuer: issuer,
-        },
-    })
-
-    return (signedPackage)
-
-}
-
-
-
 export async function signContent(content: string, issuer: string, privateKey: crypto.webcrypto.CryptoKey) {
 
     let quadArray = await n3toQuadArray(content)
@@ -64,12 +33,6 @@ export async function signContent(content: string, issuer: string, privateKey: c
     return (signedPackage)
 
 }
-
-
-
-
-
-
 
 
 function n3toQuadArray(message: string) {
