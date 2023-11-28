@@ -1,0 +1,26 @@
+@prefix dcterms: <http://purl.org/dc/terms/>.
+@prefix odrl: <http://www.w3.org/ns/odrl/2/>.
+@prefix pack: <https://example.org/ns/package#>.
+@prefix policy: <https://example.org/ns/policy#>.
+@prefix sign: <https://example.org/ns/signature#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+[] pack:packages {
+  [] pack:content {
+      [] pack:packages {
+        [] pack:content {
+            <https://pod.rubendedecker.be/profile/card#me> <http://www.w3.org/2006/vcard/ns#bday> "2000-01-01T10:00:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+          };
+          pack:packagedBy <https://user.id>;
+          pack:packagedFrom <https://user.data>;
+          pack:packagedAt "2023-11-28T12:21:33.709Z"^^xsd:dateTime.
+      }.
+    };
+    pack:packagedAt "2023-11-28T12:21:33.710Z"^^xsd:dateTime;
+    sign:hasContentSignature [
+      a sign:Signature;
+      sign:issuer <https://user.id>;
+      sign:created "2023-11-28T12:21:33.710Z"^^xsd:dateTime;
+      sign:proofValue: "VnOU4fczexcyDnhpNJlygQBvjVqSX8A9rsJogqueyveZZSwYriBCua4gxi5UcJCsDi9ABS7jkW6BYUL5NK0lXOH/wHTXV8gqNd6iRZIamfglKJWCrjovrlMEF32d+Kqo";
+    ].
+}.

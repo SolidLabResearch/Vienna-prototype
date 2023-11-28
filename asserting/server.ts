@@ -1,6 +1,17 @@
 import express from 'express';
 import { n3reasoner } from 'eyereasoner';
-import { Store } from 'n3';
+import { Quad } from '@rdfjs/types';
+import { Store, Parser } from 'n3';
+
+function parse(str: string): Quad[] {
+  return new Parser({ format: 'text/n3' }).parse(str);
+}
+
+const data = `
+@prefix : { ${req.body} } .
+
+<https://www.jeswr.org/#me> :asserts { :Ruben :age 27 . 27 <http://www.w3.org/2000/10/swap/math#GreaterThan> 18 . } .`;
+
 // import {  } '@rdfjs/express-handler';
 
 const app = express();
@@ -20,10 +31,15 @@ app.post('/neg', async (req, res) => {
   console.log(
     `{ ${wrapped} } => { ${wrapped} } .`
   )
+
+  console.log(
+    parse(data)
+  )
   
   const reasoned = await n3reasoner(
-    `<https://www.jeswr.org/#me> :asserts { :Ruben :age 27 . 27 <http://www.w3.org/2000/10/swap/math#GreaterThan> 18 . } .`,
-    `{ ${wrapped} } => { ${wrapped} } .`
+    data,
+    `{ ${wrapped} } => { ${req.body} } .`
+    // `<${req.headers['user-agent']}> :asserts { ${req.body} }`
   )
 
   res.status(200).contentType('text/n3').send(reasoned);
