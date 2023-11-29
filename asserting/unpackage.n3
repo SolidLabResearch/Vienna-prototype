@@ -73,3 +73,13 @@
   ?pack pack:assertedBy ?agent .
 } .
 
+
+{
+  ?pack pack:packages ?package .
+  ?package log:includes { [] pack:content ?content } .
+  ?content log:includes { [] pack:packages ?p1 } .
+} <= {
+  ?pack pack:packages!log:includes {
+    [] pack:content!log:includes { [] pack:packages ?p1 }
+  }
+} .
