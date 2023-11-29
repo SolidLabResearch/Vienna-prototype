@@ -88,7 +88,8 @@ export class SolidLib {
         let response = await this.session.fetch(dataInterfaceURI, {
             method: "POST",
             headers: {
-                "content-type": "text/n3"
+                "content-type": "text/n3",
+                "authorization":  JSON.stringify(authZToken.toString()),
             },
             body: query
         })
@@ -104,8 +105,6 @@ export class SolidLib {
 
 
         let data: DataPlus = { data: text }
-
-        // TODO:: WOUT :: How to get Agreements to here?
 
         let responseObject: DataPlusPlus = {
             data,

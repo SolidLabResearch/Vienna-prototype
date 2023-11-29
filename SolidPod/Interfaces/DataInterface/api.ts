@@ -4,6 +4,7 @@ import * as n3  from 'n3';
 import * as crypto from 'crypto';
 import { n3toQuadArray, signContent } from "../../Util/packaging/createSignedPackage";
 import { write } from '@jeswr/pretty-turtle';
+import { AuthZToken } from "../../../SolidLib/Interface/ISolidLib";
 
 const express = require('express')
 const app = express()
@@ -54,6 +55,37 @@ export async function runInterface(port: number) {
     })
 
     app.post(`/${name}/endpoint`, async (req: any, res: any) => {
+
+        // Check AuthZToken
+
+
+        try {
+            // note: verification token is stubbed
+            if (!req.headers.authorization) {
+                res
+                .status(401)
+                .contentType("application/json")
+                .send({ error: "No Auth Token" })
+                return
+            }
+
+            const authHeader : AuthZToken = JSON.parse(req.headers.authorization)
+            if (authHeader.access_token) throw new Error('Invalid AuthZ token')
+            if (authHeader.type !== "Bearer verySecretToken.Allowed-to-read-dob.") throw new Error('Invalid AuthZ token')
+
+            console.log(`[${new Date().toISOString()}] - [DataInterface]: AuthZ token: OK.`);
+        } catch (e) {
+            console.error(`No valid AuthZ token presented: ${e}`)
+            res
+            .status(401)
+            .contentType("application/json")
+            .send({ error: "No Auth Token" })
+            return
+        }
+
+        
+
+        
         let body = req.body
         let match;
 
