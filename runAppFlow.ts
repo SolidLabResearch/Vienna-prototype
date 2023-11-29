@@ -27,9 +27,16 @@ async function getDataFlow() {
         "verification",
         "advertisement"
     ])
+    let dataplusplustrusted = await solidLib.getDataWithTrust("?webID <https://www.w3.org/2006/vcard/ns#bday> ?bdate .", [
+        "verification",
+        "advertisement"
+    ])
 
     console.log('App flow response')
     console.log(dataplusplus)
+    console.log('The trusted data is')
+    console.log(dataplusplustrusted)
+    await solidLib.logout()
 }
 
 async function run() {

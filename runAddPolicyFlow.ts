@@ -28,9 +28,11 @@ async function addPolicy() {
     <action> <read>;
     <resource> <date_of_birth>;
     <context> <verification>.`)
+
+    await solidLib.logout();
 }
 
-function timeout(ms) {
+function timeout(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 

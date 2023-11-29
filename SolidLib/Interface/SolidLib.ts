@@ -56,6 +56,10 @@ export class SolidLib {
         this.session = session
     }
 
+    public async logout(): Promise<void> {
+        return this.session?.logout();
+    }
+
     public async getData(query: string, purpose: string[]): Promise<DataPlusPlus> {
         // TODO:: how to get NAME value here?
         const dataInterfaceURI = "http://localhost:8040/bob/endpoint"
