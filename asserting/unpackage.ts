@@ -114,6 +114,7 @@ async function unpackage() {
 
   const reasoningResult = await n3reasoner([await write([...store], {
     format: 'text/n3',
+    prefixes
   }), `
   @prefix log: <http://www.w3.org/2000/10/swap/log#> .
   @prefix dcterms: <http://purl.org/dc/terms/>.
@@ -171,16 +172,24 @@ async function unpackage() {
   } => ?content .
   `, trust]);
 
+  console.log('='.repeat(100))
+  console.log('The packaged data is:')
+  console.log(await write([...store], {
+    format: 'text/n3',
+    prefixes
+  }))
+  console.log('='.repeat(100))
+
   const reasonedStore = new Store(new Parser({ format: 'text/n3' }).parse(reasoningResult));
 
   const data = [...reasonedStore.match(null, null, null, DF.defaultGraph())].filter(
     term => term.object.termType !== 'BlankNode' || reasonedStore.match(null, null, null, term.object as any).size === 0
   )
-
+  
+  console.log('The merged data is:')
   console.log(await write(data, {
     format: 'text/n3'
   }))
-
 }
 
 unpackage();
