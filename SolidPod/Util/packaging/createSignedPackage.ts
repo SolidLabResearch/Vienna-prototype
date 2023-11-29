@@ -5,9 +5,9 @@ import * as n3  from 'n3';
 import * as rdf from 'rdf-js';
 import {RDFC10, Quads } from 'rdfjs-c14n';
 
-import * as crypto from 'crypto';
+import { subtle, webcrypto } from 'crypto';
 
-export async function signContent(content: string, issuer: string, privateKey: crypto.webcrypto.CryptoKey) {
+export async function signContent(content: string, issuer: string, privateKey: webcrypto.CryptoKey) {
     let signature = await signDataGraph(n3toQuadArray(content), privateKey)
     let signatureString = Buffer.from(signature).toString('base64') 
 
@@ -31,11 +31,11 @@ async function hashDataGraph(input: rdf.Quad[]) {
     return new TextEncoder().encode(hash);
 }
 
-async function signDataGraph(input: rdf.Quad[], privateKey: crypto.webcrypto.CryptoKey) {
+async function signDataGraph(input: rdf.Quad[], privateKey: webcrypto.CryptoKey) {
     return sign(privateKey, await hashDataGraph(input));
 }
 
-export async function verifyDataGraph(input: rdf.Quad[], signature: ArrayBuffer, publicKey: crypto.webcrypto.CryptoKey) {
+export async function verifyDataGraph(input: rdf.Quad[], signature: ArrayBuffer, publicKey: webcrypto.CryptoKey) {
     return verify(publicKey, signature, await hashDataGraph(input))
 }
 
@@ -50,17 +50,17 @@ const signParams = {
 }
 
 export async function generateKeyPair() {
-    return crypto.subtle.generateKey(keyParams, true, ["sign", "verify"]);
+    return subtle.generateKey(keyParams, true, ["sign", "verify"]);
 }
 
 export function importKey(key: string) {
-  return crypto.subtle.importKey("raw", Buffer.from(key, 'base64'), keyParams, true, ["verify"]);
+    return subtle.importKey("raw", Buffer.from(key, 'base64'), keyParams, true, ["verify"]);
 }
 
-const sign = async function(privateKey: crypto.webcrypto.CryptoKey, buffer: crypto.webcrypto.BufferSource) {
-    return crypto.subtle.sign(signParams, privateKey, buffer);
+const sign = async function(privateKey: webcrypto.CryptoKey, buffer: webcrypto.BufferSource) {
+    return subtle.sign(signParams, privateKey, buffer);
 };
 
-export const verify = async function(publicKey: crypto.webcrypto.CryptoKey, signature: ArrayBuffer, data: crypto.webcrypto.BufferSource) {
-    return crypto.subtle.verify(signParams, publicKey, signature, data );
+export const verify = async function(publicKey: webcrypto.CryptoKey, signature: ArrayBuffer, data: webcrypto.BufferSource) {
+    return subtle.verify(signParams, publicKey, signature, data );
 };
