@@ -9,14 +9,20 @@ async function setup() {
     console.log('Setting Up External APIs to fetch data')
     console.log('######################################')
     console.log('')
-    runCompanyAPI()
-    runFlandersAPI()
+    const company = await runCompanyAPI()
+    const flanders = await runFlandersAPI()
     console.log('')
     console.log('######################################')
     console.log('Setting up Pod Interfaces')
     console.log('######################################')
     console.log('')
-    startPod()
+    const pod = startPod()
+
+    return async () => {
+        await new Promise(res => company.close(res));
+        await new Promise(res => flanders.close(res));
+        await Promise.all(pod.map(p => p.stop()));
+    }
 }
 
 async function getDataFlow() {
@@ -40,7 +46,7 @@ async function getDataFlow() {
 }
 
 async function run() {
-    await setup()
+    const close = await setup()
 
     console.log('')
     console.log('######################################')
@@ -48,6 +54,7 @@ async function run() {
     console.log('######################################')
     console.log('')
     await getDataFlow()
+    await close();
 }
 
 

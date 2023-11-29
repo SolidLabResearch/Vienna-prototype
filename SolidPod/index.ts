@@ -14,5 +14,11 @@ export function startPod() {
     authZInterface.start(authZInterfacePort)
     
     // start Data Interface 
-    runInterface(dataInterfacePort);
+    const server = runInterface(dataInterfacePort);
+
+    return [
+        adminInterface,
+        authZInterface,
+        { stop: () => new Promise(res => server.then(s => s.close(res))) }
+    ]
 }

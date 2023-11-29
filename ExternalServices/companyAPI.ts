@@ -58,7 +58,7 @@ export async function run() {
     })
 
 
-    app.listen(port, () => {
+    return app.listen(port, () => {
         console.log(
 `Running Company API
 

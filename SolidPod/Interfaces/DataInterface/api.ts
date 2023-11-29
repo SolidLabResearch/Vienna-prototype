@@ -4,8 +4,8 @@ import * as n3  from 'n3';
 import * as crypto from 'crypto';
 import { n3toQuadArray, signContent } from "../../Util/packaging/createSignedPackage";
 import { write } from '@jeswr/pretty-turtle';
+import express from 'express';
 
-const express = require('express')
 const app = express()
 
 app.use(express.text({
@@ -119,7 +119,7 @@ export async function runInterface(port: number) {
     })
 
 
-    app.listen(port, () => {
+    return app.listen(port, () => {
         console.log(
 `Running Pod API system
 
