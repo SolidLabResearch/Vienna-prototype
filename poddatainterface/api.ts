@@ -18,7 +18,7 @@ app.use(express.text({
 
 let tripleStore = new n3.Store();
 
-const packagePredicate = "https://example.org/ns/package#package"
+const packagePredicate = "https://example.org/ns/package#packages"
 const contentPredicate = "https://example.org/ns/package#content"
 
 async function run() {
