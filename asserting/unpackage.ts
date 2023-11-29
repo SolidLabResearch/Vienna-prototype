@@ -24,11 +24,23 @@ async function unpackage() {
       'Content-Type': 'text/n3',
       'user-agent': 'https://www.jeswr.org/#me'
     },
-    body: ':Ruben :age _:X .'
+    body: '?S ?P ?O .'
   });
 
   const extractedContent = new Store();
   const store = new Store(new Parser({ format: 'text/n3' }).parse(await res.text()));
+
+  for (const data of store.match(null, DF.namedNode('https://example.org/ns/package#packages'), null, DF.defaultGraph())) {
+    store.add(
+      DF.quad(
+        data.subject,
+        DF.namedNode('https://example.org/ns/package#assertedBy'),
+        DF.namedNode(bobEndpoint),
+        DF.defaultGraph()
+      )
+    )
+  }
+
 
   // This is the data living in the users global context
   // const trustStore = new Store(new Parser({ format: 'text/n3' }).parse(`
@@ -47,16 +59,16 @@ async function unpackage() {
     :Jesse rot:trusts <http://localhost:3456/flandersgov/id> .
   `
 
-  console.log(store.size);
+  // console.log(store.size);
   await validateSignatures(store);
-  console.log(store.size)
+  // console.log(store.size)
 
-  console.log(await write([...store], {
-    format: 'text/n3',
-    prefixes
-  }));
+  // console.log(await write([...store], {
+  //   format: 'text/n3',
+  //   prefixes
+  // }));
 
-  const allData = new Store([...extractedContent, ...store]);
+  // const allData = new Store([...extractedContent, ...store]);
 
   // This should be the job of a reasoner [bring all verified signatures to the top]
   // for (const { subject, predicate, graph } of allData.match(null, DF.namedNode('https://example.org/ns/signature#signatureHasBeenVerified'), null)) {
@@ -99,7 +111,7 @@ async function unpackage() {
   //   // ))
   // }
 
-  console.log(await n3reasoner([await write([...store], {
+  const reasoningResult = await n3reasoner([await write([...store], {
     format: 'text/n3',
   }), `
   @prefix log: <http://www.w3.org/2000/10/swap/log#> .
@@ -156,7 +168,18 @@ async function unpackage() {
       rot:trusts ?issuer 
     ] .
   } => ?content .
-  `, trust]));
+  `, trust]);
+
+  const reasonedStore = new Store(new Parser({ format: 'text/n3' }).parse(reasoningResult));
+
+  const data = [...reasonedStore.match(null, null, null, DF.defaultGraph())].filter(
+    term => term.object.termType !== 'BlankNode' || reasonedStore.match(null, null, null, term.object as any).size === 0
+  )
+
+  console.log(await write(data, {
+    format: 'text/n3'
+  }))
+
 }
 
 unpackage();
