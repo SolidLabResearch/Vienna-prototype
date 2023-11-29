@@ -35,9 +35,9 @@ nvm use 20
 ## Flows 
 
 We have four different flows: 
-* getData: We can retrieve the birthdate using the app flow.
+* [getData](https://raw.githubusercontent.com/SolidLabResearch/Vienna-prototype/main/img/shop-get-data-version-not-signing-data.svg): We can retrieve the birthdate using the app flow.
 * getDataWithTrust: We can retrieve all trusted data using the trusted data app flow.
-* addPolicy: Adding a policy to the pod
+* [addPolicy](https://raw.githubusercontent.com/SolidLabResearch/Vienna-prototype/main/img/owner-set-up-policy.svg): Adding a policy to the pod
 * end-to-end: Adding a policy to the pod and then getting the birthdate using the app flow.
 
 To run the end to end flow, you can use the following command 
