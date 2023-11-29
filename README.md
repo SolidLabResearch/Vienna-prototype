@@ -1,56 +1,20 @@
 # Vienna hackathon
 
 
-## Installing everything
-*Note* This code only works on Node 20+
+## Running the app flow
 
+
+We can retrieve the birthdate using the app flow.
 ```
-cd packaging
-npm install
-
-cd ../poddatainterface
-npm install
-
-cd ../services
-npm install
-
-cd ../asserting
-npm install
-
-cd ..
+ts-node runAppFlow.ts
 ```
 
-## Running the services that provide some data
+We can retrieve all trusted data using the trusted data app flow.
 ```
-cd services
-bash run
-```
-This will startup the services, and show you their respective endpoints
-
-you can test their responses by querying the services e.g.
-```
-curl http://localhost:3456/flandersgov/endpoint/dob?id=http://localhost:8040/bob/id
+ts-node runAppFlowAll.ts
 ```
 
-## Running the "POD" API
+## Running the AddPolicy flow
 ```
-cd poddatainterface
-ts-node api.ts bob
+ts-node runAddPolicyFlow.ts
 ```
-This will startup the pod data interface (you can choose the name at the end)
-This automatically pulls in the data from the services above
-
-## Making a request
-
-Example request for getting the birthdate 
-```
-curl http://localhost:8040/bob/endpoint -H "Content-Type: text/n3" -X POST --data '?a <https://www.w3.org/2006/vcard/ns#bday> ?c.'
-
-```
-
-Example request for getting all data
-```
-curl http://localhost:8040/bob/endpoint -H "Content-Type: text/n3" -X POST --data '?a ?b ?c.'
-```
-
-

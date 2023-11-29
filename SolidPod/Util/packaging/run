@@ -1,6 +1,0 @@
-#!/bin/bash
-npx ts-node Interfaces/DataInterface/api.ts bob
-
-npx ts-node Interfaces/DataInterface/api.ts bob
-
-npx ts-node Interfaces/DataInterface/api.ts bob
