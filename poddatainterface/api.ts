@@ -9,8 +9,6 @@ const express = require('express')
 const app = express()
 const port = 3123
 
-const createGovernmentEndpointRequest = async (webId: string) => await (await fetch(`http://localhost:3456/flandersgov/endpoint/dob?id=${webId}`)).text()
-
 app.use(express.text({
   type: ['text/n3', 'text/turtle', 'text/plain']
 }));
@@ -31,10 +29,7 @@ async function run() {
     const webid = `http://localhost:${port}/${name}/id`
     const endpoint = `http://localhost:${port}/${name}/endpoint`
 
-
-    let bdatePackage = await createGovernmentEndpointRequest(webid);
-    let quads = await n3toQuadArray(bdatePackage)
-    tripleStore.addQuads(quads)
+    await prefetch(webid);
 
 
     // Create keypair for the data pod
@@ -133,6 +128,13 @@ ${endpoint}`
 
 
 }
+
+async function prefetch(webId: string) {
+    tripleStore.addQuads( await n3toQuadArray( await (await fetch(`http://localhost:3456/flandersgov/endpoint/dob?id=${webId}`)).text() ) )
+    tripleStore.addQuads( await n3toQuadArray( await (await fetch(`http://localhost:3456/flandersgov/endpoint/name?id=${webId}`)).text() ) )
+    tripleStore.addQuads( await n3toQuadArray( await (await fetch(`http://localhost:3456/flandersgov/endpoint/address?id=${webId}`)).text() ) )
+    tripleStore.addQuads( await n3toQuadArray( await (await fetch(`http://localhost:3457/company/endpoint/licensekey?id=${webId}`)).text() ) )
+} 
 
 /**
  * 
