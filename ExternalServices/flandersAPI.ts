@@ -6,7 +6,7 @@ import * as n3  from 'n3';
 
 import * as crypto from 'crypto';
 
-import { signContent, generateKeyPair } from "../packaging/createSignedPackage";
+import { signContent, generateKeyPair } from "../SolidPod/Util/packaging/createSignedPackage"
 
 
 async function run() {

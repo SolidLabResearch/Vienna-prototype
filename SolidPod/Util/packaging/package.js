@@ -90,9 +90,9 @@ exports.packageContent = function packageContent(content, options) {
  * @param {string=} options.sign.issuer // Issuer of the signature
  */
 function processContent(lines, options) {
-    parsingPrefixes = true;
-    prefixString = '';
-    contentsString = '';
+    let parsingPrefixes = true;
+    let prefixString = '';
+    let contentsString = '';
 
     for (let line of lines) { 
         if (line.trim() !== "" && !line.trim().startsWith("@prefix")) {

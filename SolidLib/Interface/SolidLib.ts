@@ -1,5 +1,5 @@
 import { Session } from "@rubensworks/solid-client-authn-isomorphic";
-import { Action, AuthZToken, DataPlusPlus, SolidAuthZRequestMessage } from "./ISolidLib";
+import { Action, Agreement, AuthZToken, DataPlus, DataPlusPlus, SolidAuthZRequestMessage } from "./ISolidLib";
 import { getAuthenticatedSession } from "../../SolidPod/Util/CSSAuthentication"
 
 export class SolidLib {
@@ -32,7 +32,9 @@ export class SolidLib {
         this.session = session
     }
 
-    public async getData(query: any, purpose: string[]): Promise<DataPlusPlus> {
+    public async getData(query: string, purpose: string[]): Promise<DataPlusPlus> {
+        // TODO:: how to get NAME value here?
+        const dataInterfaceURI = "http://localhost:3123/bob/endpoint"
         // stubbed: Don't have access
         console.log(`SolidLib]:getData - No access, need AuthZ token.`)
         const authZRequestMessage: SolidAuthZRequestMessage = {
@@ -51,7 +53,40 @@ export class SolidLib {
 
         console.log(`SolidLib]:getData - Now that token is there, fetch data`, authZToken)
 
-        throw Error("not implemented yet")
+        if (!this.session) {
+            throw Error("No session")
+        }
+
+        let response = await this.session.fetch(dataInterfaceURI, {
+            method: "POST",
+            headers: {
+                "content-type": "text/n3"
+            },
+            body: query
+        })
+
+        let code = response.status;
+
+        let text = await response.text();
+
+        if (code !== 200) {
+            console.error(`Data request failed: ${text}`)
+            return {data: {data: ""}, agreements: []};
+        }
+
+
+        let data : DataPlus =  { data: text }
+
+        // TODO:: WOUT :: How to get Agreements to here?
+        let agreements: Agreement[] = []
+
+        let responseObject: DataPlusPlus = {
+            data,
+            agreements,
+        }
+
+        return responseObject;
+
     }
 
     public async addPolicy(policy: string): Promise<boolean> {

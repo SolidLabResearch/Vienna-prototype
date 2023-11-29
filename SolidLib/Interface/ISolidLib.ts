@@ -31,9 +31,13 @@ export type Agreement = {
 
 }
 
+// export type DataPlus = {
+//     dataSignature: string,
+//     dataProvenance: string[],
+//     data: string
+// }
+
 export type DataPlus = {
-    dataSignature: string,
-    dataProvenance: string[],
     data: string
 }
 

@@ -19,7 +19,7 @@ let tripleStore = new n3.Store();
 const packagePredicate = "https://example.org/ns/package#packages"
 const contentPredicate = "https://example.org/ns/package#content"
 
-async function run() {
+export async function runInterface() {
 
     let name = process.argv[2]
 
@@ -220,5 +220,3 @@ function extractSubgraphFromStore(store: n3.Store, graph: n3.Term): n3.Quad[] {
 
     return subgraphQuads;
 }
-
-run()
