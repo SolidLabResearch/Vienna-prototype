@@ -34,7 +34,7 @@ export class SolidLib {
 
     public async getData(query: string, purpose: string[]): Promise<DataPlusPlus> {
         // TODO:: how to get NAME value here?
-        const dataInterfaceURI = "http://localhost:3123/bob/endpoint"
+        const dataInterfaceURI = "http://localhost:8040/bob/endpoint"
         // stubbed: Don't have access
         console.log(`SolidLib]:getData - No access, need AuthZ token.`)
         const authZRequestMessage: SolidAuthZRequestMessage = {

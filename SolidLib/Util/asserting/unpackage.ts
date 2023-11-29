@@ -15,7 +15,7 @@ const prefixes = {
 }
 
 async function unpackage() {
-  const bobEndpoint = 'http://localhost:3123/bob/endpoint';
+  const bobEndpoint = 'http://localhost:8040/bob/endpoint';
 
   const res = await fetch(bobEndpoint, {
     method: 'POST',
@@ -25,7 +25,7 @@ async function unpackage() {
       'user-agent': 'https://www.jeswr.org/#me'
     },
     // body: '?S ?P ?O .'
-    body: '<http://localhost:3123/bob/id> <https://www.w3.org/2006/vcard/ns#bday> ?O .'
+    body: '<http://localhost:8040/bob/id> <https://www.w3.org/2006/vcard/ns#bday> ?O .'
   });
 
   const extractedContent = new Store();

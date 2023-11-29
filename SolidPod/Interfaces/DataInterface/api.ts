@@ -7,7 +7,6 @@ import { write } from '@jeswr/pretty-turtle';
 
 const express = require('express')
 const app = express()
-const port = 3123
 
 app.use(express.text({
   type: ['text/n3', 'text/turtle', 'text/plain']
@@ -19,7 +18,7 @@ let tripleStore = new n3.Store();
 const packagePredicate = "https://example.org/ns/package#packages"
 const contentPredicate = "https://example.org/ns/package#content"
 
-export async function runInterface() {
+export async function runInterface(port: number) {
 
     let name = process.argv[2]
 

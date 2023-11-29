@@ -9,7 +9,7 @@ import * as crypto from 'crypto';
 import { signContent, generateKeyPair } from "../SolidPod/Util/packaging/createSignedPackage"
 
 
-async function run() {
+export async function run() {
 
     const compid = `http://localhost:${port}/company/id`
 
@@ -71,6 +71,3 @@ http://localhost:${port}/company/endpoint/licensekey?id=<webid>`
     })
 
 }
-
-
-run()
