@@ -52,17 +52,14 @@ async function run() {
     let publicKeyString = Buffer.from(publicKeyRaw).toString('base64')
 
     // The Dialog endpoint, a get request will trigger an error
-
-    //@ts-ignore
-    app.get(`/${name}/endpoint`, async (req, res) => {
+    app.get(`/${name}/endpoint`, async (req: any, res: any) => {
 
         res.status(400)
 
         res.send("Please do a POST request to this endpoint with the dialog message as body")
     })
 
-    //@ts-ignore
-    app.post(`/${name}/endpoint`, async (req, res) => {
+    app.post(`/${name}/endpoint`, async (req: any, res: any) => {
         let body = req.body
 
         let parser = new n3.Parser({format: "text/n3"}) 
@@ -105,12 +102,10 @@ async function run() {
         let signedPackage = await signContent(provenanceWrappedPackage, webid, keypair.privateKey)
         
         // Send the response
-        res.send(signedPackage)
+        res.status(200).contentType('text/n3').send(signedPackage)
     })
 
-
-    //@ts-ignore
-    app.get(`/${name}/id`, async (req, res) => {
+    app.get(`/${name}/id`, async (req: any, res: any) => {
 
         let webId = 
 `@prefix foaf: <http://xmlns.com/foaf/0.1/>.
@@ -119,7 +114,7 @@ async function run() {
     foaf:name "${name}"@en;
     <http://www.w3.org/ns/auth/cert#key>  "${publicKeyString}".
 `
-        res.send(webId)
+        res.status(200).contentType('text/turtle').send(webId)
     })
 
 
@@ -138,7 +133,6 @@ ${endpoint}`
 
 
 }
-
 
 /**
  * 
@@ -217,6 +211,5 @@ function extractSubgraphFromStore(store: n3.Store, graph: n3.Term): n3.Quad[] {
 
     return subgraphQuads;
 }
-
 
 run()

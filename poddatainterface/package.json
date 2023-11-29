@@ -5,6 +5,7 @@
     "n3": "github:rdfjs/N3.js#fd6e7f1d5982fa113349a6ad03ad99e52db898d7"
   },
   "devDependencies": {
+    "@types/express": "^4.17.21",
     "@types/n3": "^1.16.4"
   }
 }
