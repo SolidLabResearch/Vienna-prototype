@@ -1,8 +1,8 @@
 //@ts-ignore
-import * as pack from "../packaging/package"
+import * as pack from "../../Util/packaging/package"
 import * as n3  from 'n3';
 import * as crypto from 'crypto';
-import { n3toQuadArray, signContent } from "../packaging/createSignedPackage";
+import { n3toQuadArray, signContent } from "../../Util/packaging/createSignedPackage";
 import { write } from '@jeswr/pretty-turtle';
 
 const express = require('express')

@@ -1,0 +1,25 @@
+{
+  "dependencies": {
+    "@jeswr/pretty-turtle": "^1.4.0",
+    "express": "^4.18.2",
+    "n3": "github:rdfjs/N3.js#fd6e7f1d5982fa113349a6ad03ad99e52db898d7",
+    "@rdfjs/express-handler": "^2.0.0",
+    "@types/n3": "^1.16.4",
+    "eyereasoner": "^10.7.2",
+    "@inrupt/solid-client-authn-core": "^1.17.5",
+    "@rubensworks/solid-client-authn-isomorphic": "^2.0.1",
+    "@solid/community-server": "^7.0.2",
+    "body-parser": "^1.20.2",
+    "typescript": "^5.3.2"
+},
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/n3": "^1.16.4",
+    "@types/jest":"^29.5.10" , 
+    "dotenv": "^16.3.1",
+    "ts-node": "^10.9.1",
+    "jest":"^29.7.0",
+    "ts-jest":"^29.1.1",
+    "@types/rdfjs__express-handler": "^2.0.4"
+  }
+}
