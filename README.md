@@ -48,7 +48,7 @@ curl http://localhost:3123/bob/endpoint -H "Content-Type: text/n3" -X POST --dat
 
 Example request for getting all data
 ```
-curl http://localhost:3123/dexa/endpoint -H "Content-Type: text/n3" -X POST --data '?a ?b ?c.'
+curl http://localhost:3123/bob/endpoint -H "Content-Type: text/n3" -X POST --data '?a ?b ?c.'
 ```
 
 
