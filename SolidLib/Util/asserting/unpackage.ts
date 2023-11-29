@@ -2,7 +2,7 @@ import { n3reasoner } from 'eyereasoner';
 import { Store, Parser, DataFactory as DF } from 'n3';
 import { Term } from '@rdfjs/types';
 import { write } from '@jeswr/pretty-turtle';
-import { validateSignatures } from '../packaging/validateSignatures';
+import { validateSignatures } from '../../../SolidPod/Util/packaging/validateSignatures';
 
 const prefixes = {
   pack: 'https://example.org/ns/package#',

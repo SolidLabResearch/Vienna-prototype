@@ -83,6 +83,8 @@ export interface ISolidAwareLib {
 
     getData: (query: Query, purpose: Purpose[]) => Promise<DataPlusPlus> // get AuthNToken from session
 
+    getTrustedData: (query: Query, purpose: Purpose[]) => Promise<DataPlusPlus> // get AuthNToken from session
+
     addPolicy: (policy: Policy) => Promise<boolean> // get AuthNToken from session
 }
 

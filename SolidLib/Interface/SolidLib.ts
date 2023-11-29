@@ -1,9 +1,33 @@
+import { write } from "@jeswr/pretty-turtle/dist";
 import { Session } from "@rubensworks/solid-client-authn-isomorphic";
+import { n3reasoner } from "eyereasoner/dist";
+import { DataFactory as DF, DataFactory, Parser, Store } from "n3";
+import { getAuthenticatedSession } from "../../SolidPod/Util/CSSAuthentication";
 import { Action, Agreement, AuthZToken, DataPlus, DataPlusPlus, SolidAuthZRequestMessage } from "./ISolidLib";
-import { getAuthenticatedSession } from "../../SolidPod/Util/CSSAuthentication"
+import { validateSignatures } from '../../SolidPod/Util/packaging/validateSignatures';
+
+const { namedNode } = DataFactory
 
 export class SolidLib {
     private session: Session | undefined;
+
+    private readonly prefixes = {
+        pack: 'https://example.org/ns/package#',
+        odrl: 'http://www.w3.org/ns/odrl/2/',
+        sign: 'https://example.org/ns/signature#',
+        dc: 'http://purl.org/dc/terms/',
+        xsd: 'http://www.w3.org/2001/XMLSchema#',
+        vcard: 'https://www.w3.org/2006/vcard/ns#',
+        policy: 'https://example.org/ns/policy#'
+    }
+
+    private readonly trust = `
+    @prefix : <http://example.org/> .
+    @prefix rot: <https://purl.org/krdb-core/rot/rot#> .
+
+    :globals :user :Jesse .
+    :Jesse rot:trusts <http://localhost:3456/flandersgov/id> .
+  `
 
     constructor(private client: string) {
 
@@ -71,11 +95,11 @@ export class SolidLib {
 
         if (code !== 200) {
             console.error(`Data request failed: ${text}`)
-            return {data: {data: ""}, agreements: resultingAgreements};
+            return { data: { data: "" }, agreements: resultingAgreements };
         }
 
 
-        let data : DataPlus =  { data: text }
+        let data: DataPlus = { data: text }
 
         // TODO:: WOUT :: How to get Agreements to here?
 
@@ -88,10 +112,88 @@ export class SolidLib {
 
     }
 
-    public async getDataWithTrust(query: string, purpose: string[]): Promise<any> {
-        let dataplusplus = await this.getData(query, purpose)
-        
-        // TODO:: JESSE :: whatever u want
+    public async getDataWithTrust(query: string, purpose: string[]): Promise<DataPlusPlus> {
+        let dataplusplus = await this.getData(query, purpose);
+
+        const store = new Store(new Parser({ format: 'text/n3' }).parse(dataplusplus.data.data));
+
+        await validateSignatures(store);
+        const reasoningResult = await n3reasoner([await write([...store], {
+            format: 'text/n3',
+            prefixes: this.prefixes,
+        }), `
+      @prefix log: <http://www.w3.org/2000/10/swap/log#> .
+      @prefix dcterms: <http://purl.org/dc/terms/>.
+      @prefix odrl: <http://www.w3.org/ns/odrl/2/>.
+      @prefix pack: <https://example.org/ns/package#>.
+      @prefix policy: <https://example.org/ns/policy#>.
+      @prefix sign: <https://example.org/ns/signature#>.
+      @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+      @prefix rot: <https://purl.org/krdb-core/rot/rot#> .
+      @prefix : <http://example.org/> .
+    
+      {
+        ?pack pack:packages ?package .
+        ?package log:includes { [] pack:content ?content } .
+        ?content log:includes { [] pack:packages ?p1 } .
+      } => {
+        [] pack:flatPackages ?p1
+      } .
+    
+      {
+        ?pack pack:packages ?package .
+      } => {
+        [] pack:flatPackages ?package
+      } .
+    
+      {
+        ?pack pack:flatPackages ?package .
+        ?package log:includes { [] pack:content ?content } .
+        ?content log:includes { [] pack:packages ?p1 } .
+      } => {
+        [] pack:flatPackages ?p1
+      } .
+    
+      {
+        ?pack pack:flatPackages ?package .
+        ?package log:includes {
+          [] sign:signatureHasBeenVerified true;
+            sign:hasContentSignature [
+              sign:issuer ?issuer
+            ]  
+        } .
+      } => {
+        [] pack:packages ?package ;
+          pack:assertedBy ?issuer .
+      } . 
+      
+      {
+        ?pack pack:packages ?package .
+        ?package log:includes { [] pack:content ?content } .
+    
+        ?pack pack:assertedBy ?issuer .
+        :globals :user [ 
+          rot:trusts ?issuer 
+        ] .
+      } => ?content .
+      `, this.trust]);
+
+        const reasonedStore = new Store(new Parser({ format: 'text/n3' }).parse(reasoningResult));
+
+        const data = [...reasonedStore.match(null, null, null, DF.defaultGraph())].filter(
+            term => (term.object.termType !== 'BlankNode' || reasonedStore.match(null, null, null, term.object as any).size === 0)
+                && !term.predicate.equals(namedNode('https://example.org/ns/package#assertedBy'))
+        )
+
+        return {
+            data: {
+                data: await write(data, {
+                    prefixes: this.prefixes,
+                    format: 'text/n3'
+                })
+            },
+            agreements: dataplusplus.agreements
+        }
     }
 
     public async addPolicy(policy: string): Promise<boolean> {
@@ -141,9 +243,9 @@ export class SolidLib {
 
     }
 
-    private async getAuthZToken(authZRequestMessage: SolidAuthZRequestMessage): Promise<{ token: AuthZToken, agreements: Agreement[]} > {
+    private async getAuthZToken(authZRequestMessage: SolidAuthZRequestMessage): Promise<{ token: AuthZToken, agreements: Agreement[] }> {
         const AuthZInterfaceURL = "http://localhost:8050/" // Note: hardcoded
-        const agreements : Agreement[] = []
+        const agreements: Agreement[] = []
         if (!this.session) {
             throw Error("No session")
         }
