@@ -155,12 +155,12 @@ function policyNegotiation(authZRequestMessage: any, client_id: string, actor: s
 export class AuthZInterface {
   private server: Server | undefined;
   public start(port: number): void {
-    app.listen(port, () => {
+    this.server = app.listen(port, () => {
       console.log(`Authorization Interface listening on ${port}`)
       console.log(`URI: http://localhost:${port}/`)
     })
   }
-  public stop(): void {
-    this.server?.close();
+  public async stop(): Promise<void> {
+    await new Promise<any>(res => this.server?.close(res));
   }
 }

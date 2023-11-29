@@ -5,8 +5,8 @@ import * as crypto from 'crypto';
 import { n3toQuadArray, signContent } from "../../Util/packaging/createSignedPackage";
 import { write } from '@jeswr/pretty-turtle';
 import { AuthZToken } from "../../../SolidLib/Interface/ISolidLib";
+import express from 'express';
 
-const express = require('express')
 const app = express()
 
 app.use(express.text({
@@ -69,9 +69,8 @@ export async function runInterface(port: number) {
                 return
             }
 
-            const authHeader : AuthZToken = JSON.parse(req.headers.authorization)
-            if (authHeader.access_token) throw new Error('Invalid AuthZ token')
-            if (authHeader.type !== "Bearer verySecretToken.Allowed-to-read-dob.") throw new Error('Invalid AuthZ token')
+            const authHeader : string = req.headers.authorization
+            if (authHeader !== "Bearer verySecretToken.Allowed-to-read-dob.") throw new Error('Invalid AuthZ token')
 
             console.log(`[${new Date().toISOString()}] - [DataInterface]: AuthZ token: OK.`);
         } catch (e) {
@@ -151,7 +150,7 @@ export async function runInterface(port: number) {
     })
 
 
-    app.listen(port, () => {
+    return app.listen(port, () => {
         console.log(
 `Running Pod API system
 

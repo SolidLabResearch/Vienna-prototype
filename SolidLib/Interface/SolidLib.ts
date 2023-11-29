@@ -85,11 +85,12 @@ export class SolidLib {
             throw Error("No session")
         }
 
-        let response = await this.session.fetch(dataInterfaceURI, {
+        // session.fetch already has a lot of stuff in the authorization token
+        let response = await fetch(dataInterfaceURI, {
             method: "POST",
             headers: {
                 "content-type": "text/n3",
-                "authorization":  JSON.stringify(authZToken.toString()),
+                "authorization":  `${authZToken.type} ${authZToken.access_token}`,
             },
             body: query
         })
