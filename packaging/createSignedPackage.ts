@@ -35,7 +35,7 @@ export async function signContent(content: string, issuer: string, privateKey: c
 }
 
 
-function n3toQuadArray(message: string) {
+export function n3toQuadArray(message: string) {
     let parsed = new n3.Parser({format: "text/n3"}).parse(message)
     return parsed
 }

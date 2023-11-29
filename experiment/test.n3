@@ -47,5 +47,6 @@ _:message a dialog:dialogMessage;
             <webId> vcard:bday ?bdate.
         }
         
+        
 
     }

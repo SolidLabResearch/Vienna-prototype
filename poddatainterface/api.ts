@@ -9,13 +9,16 @@ import * as n3  from 'n3';
 
 import * as crypto from 'crypto';
 
-import { signContent } from "../packaging/createSignedPackage";
+import { n3toQuadArray, signContent } from "../packaging/createSignedPackage";
 
 const createGovernmentEndpointRequest = async (webId: string) => await (await fetch(`http://localhost:3456/flandersgov/endpoint/dob?id=${webId}`)).text()
 
 app.use(express.text({
   type: ['text/n3', 'text/turtle', 'text/plain']
 }));
+
+
+let tripleStore = new n3.Store();
 
 
 
@@ -25,10 +28,14 @@ async function run() {
 
     name = name || "bob"
 
-    let tripleStore = new n3.Store();
 
     const webid = `http://localhost:${port}/${name}/id`
     const endpoint = `http://localhost:${port}/${name}/endpoint`
+
+
+    let bdatePackage = await createGovernmentEndpointRequest(webid);
+    let quads = await n3toQuadArray(bdatePackage)
+    tripleStore.addQuads(quads)
 
 
     // Create keypair for the data pod
@@ -61,20 +68,22 @@ async function run() {
         console.log("request body", body)
 
         // Prefetching government data
-
         let bdatePackage = await createGovernmentEndpointRequest(webid);
         console.log('data', bdatePackage)
 
-        // let signedPackage = await signContent(bdatePackage, webid, keypair.privateKey)
 
-        let packagedBdate = pack.packageContent(bdatePackage, {
+        // Package the government data in the correct provenance
+        let packagedBdate = await pack.packageContent(bdatePackage, {
             packagedBy: webid,
             packagedFrom: endpoint,
             purpose: "https://gdpr.org/purposes/Research",
         })
+
+        // Sign the package as the Pod
+        let signedPackage = await signContent(packagedBdate, webid, keypair.privateKey)
         
-        // let content = "Hello World \n"
-        res.send(packagedBdate)
+        // Send the response
+        res.send(signedPackage)
     })
 
 
@@ -107,6 +116,8 @@ ${endpoint}`
 
 
 }
+
+function getMatchFromTripleStore(store: n3.Store, match: n3.Quad)
 
 
 run()
