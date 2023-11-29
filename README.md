@@ -12,6 +12,9 @@ npm install
 cd ../services
 npm install
 
+cd ../asserting
+npm install
+
 cd ..
 ```
 
