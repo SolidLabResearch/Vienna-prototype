@@ -1,0 +1,9 @@
+#!/bin/bash
+
+cd packaging
+npm install
+cd ../poddatainterface
+npm install
+cd ../services
+npm install
+cd ..
