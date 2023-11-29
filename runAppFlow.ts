@@ -8,6 +8,7 @@ async function main(){
         "advertisement"
     ])
 
-    console.log('RESPONSE', dataplusplus)
+    console.log('App flow response')
+    console.log(dataplusplus)
 }
 main()

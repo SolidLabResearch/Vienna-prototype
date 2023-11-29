@@ -49,7 +49,7 @@ export class SolidLib {
             agreement: undefined
         }
 
-        const authZToken = await this.getAuthZToken(authZRequestMessage)
+        const { token: authZToken, agreements: resultingAgreements } = await this.getAuthZToken(authZRequestMessage)
 
         console.log(`SolidLib]:getData - Now that token is there, fetch data`, authZToken)
 
@@ -71,18 +71,17 @@ export class SolidLib {
 
         if (code !== 200) {
             console.error(`Data request failed: ${text}`)
-            return {data: {data: ""}, agreements: []};
+            return {data: {data: ""}, agreements: resultingAgreements};
         }
 
 
         let data : DataPlus =  { data: text }
 
         // TODO:: WOUT :: How to get Agreements to here?
-        let agreements: Agreement[] = []
 
         let responseObject: DataPlusPlus = {
             data,
-            agreements,
+            agreements: resultingAgreements,
         }
 
         return responseObject;
@@ -118,7 +117,7 @@ export class SolidLib {
             action: Action.Write,
             query: "policy"
         }
-        const authZToken = await this.getAuthZToken(authZRequestMessage)
+        const authZToken = await (await this.getAuthZToken(authZRequestMessage)).token
         console.log(`SolidLib]:addPolicy - Now that token is there, add Policy`, authZToken)
 
         response = await fetch(adminInterfaceUrl, {
@@ -136,9 +135,9 @@ export class SolidLib {
 
     }
 
-    private async getAuthZToken(authZRequestMessage: SolidAuthZRequestMessage): Promise<AuthZToken> {
+    private async getAuthZToken(authZRequestMessage: SolidAuthZRequestMessage): Promise<{ token: AuthZToken, agreements: Agreement[]} > {
         const AuthZInterfaceURL = "http://localhost:8050/" // Note: hardcoded
-
+        const agreements : Agreement[] = []
         if (!this.session) {
             throw Error("No session")
         }
@@ -180,6 +179,9 @@ export class SolidLib {
                 policy: preObligationRequest.value.policy
             }
 
+            // TODO:: WOUT :: Like this?
+            agreements.push(agreement as Agreement);
+
             const agreementResponse = await this.session.fetch(AuthZInterfaceURL, {
                 method: "POST",
                 headers: {
@@ -195,15 +197,15 @@ export class SolidLib {
 
             if (agreementResponse.status === 200) {
                 console.log(`[SolidLib]:getAuthZToken - Retrieved an AuthZ token to ${agreement.policy["access-mode"]} ${agreement.policy.resource}.`)
-                token = agreementResponse.json() as any
+                token = await agreementResponse.json() as any
             } else {
                 console.log('[SolidLib]:getAuthZToken - Failed to retrieve an AuthZ token.')
             }
         } else {
             console.log(`[SolidLib]:getAuthZToken - Retrieved an AuthZ token (no agreements).`)
-            token = res.json() as any
+            token = await res.json() as any
         }
-        return token
+        return { token, agreements }
     }
 }
 
