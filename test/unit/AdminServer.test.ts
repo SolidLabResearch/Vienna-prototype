@@ -31,8 +31,8 @@ describe('an Admin Interface request', () => {
             client: client
         })
     })
-    afterAll( () => {
-// adminInterface.stop()
+    afterAll(() => {
+        adminInterface.stop()
     })
 
     it('with no Authorization token fails.', async () => {
@@ -63,7 +63,7 @@ describe('an Admin Interface request', () => {
             method: "POST",
             headers: {
                 "Authorization": verySecretToken,
-                "content-type":"text/turtle"
+                "content-type": "text/turtle"
             }
         })
         expect(response.status).toBe(200);
