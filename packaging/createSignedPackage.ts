@@ -1,43 +1,31 @@
 //@ts-ignore
 import * as pack from "./package"
 
-import { n3reasoner } from 'eyereasoner';
-
 import * as n3  from 'n3';
 import * as rdf from 'rdf-js';
 import {RDFC10, Quads } from 'rdfjs-c14n';
 
 import * as crypto from 'crypto';
 
-
-
-
-let content = `
-<https://pod.rubendedecker.be/profile/card#me> <http://www.w3.org/2006/vcard/ns#bday> "2000-01-01T10:00:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-`
-
 export async function signContent(content: string, issuer: string, privateKey: crypto.webcrypto.CryptoKey) {
 
-    let quadArray = await n3toQuadArray(content)
+    let quadArray = n3toQuadArray(content)
     let signature = await signDataGraph(quadArray, privateKey)
    
     let signatureString = Buffer.from(signature).toString('base64') 
 
-    let signedPackage = pack.packageContent(content, {
+    return pack.packageContent(content, {
         sign: {
             signature: signatureString,
             issuer: issuer,
         },
     })
 
-    return (signedPackage)
-
 }
 
 
 export function n3toQuadArray(message: string) {
-    let parsed = new n3.Parser({format: "text/n3"}).parse(message)
-    return parsed
+    return new n3.Parser({format: "text/n3"}).parse(message)
 }
 
 async function hashDataGraph(input: rdf.Quad[]) {
@@ -81,7 +69,7 @@ export async function verifyDataGraph(input: rdf.Quad[], signature: ArrayBuffer,
     return verify(publicKey, signature, await hashDataGraph(input))
 }
 
-const generateKeyPair = async function() {
+export const generateKeyPair = async function() {
     return crypto.subtle.generateKey(
         {
             name: "ECDSA",
@@ -105,10 +93,3 @@ export const verify = async function(publicKey: crypto.webcrypto.CryptoKey, sign
       hash: 'SHA-512'
     }, publicKey, signature, data );
 };
-
-
-
-
-
-
-// packageAndSignContent(content, )

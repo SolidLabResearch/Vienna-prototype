@@ -6,21 +6,14 @@ import * as n3  from 'n3';
 
 import * as crypto from 'crypto';
 
-import { signContent } from "../packaging/createSignedPackage";
+import { signContent, generateKeyPair } from "../packaging/createSignedPackage";
 
 
 async function run() {
 
     const govid = `http://localhost:${port}/flandersgov/id`
 
-    let keypair = await crypto.subtle.generateKey(
-        {
-            name: "ECDSA",
-            namedCurve: "P-384",
-        },
-        true,
-        ["sign", "verify"]
-    );
+    let keypair = await generateKeyPair();
 
     let publicKeyRaw = await crypto.subtle.exportKey("raw", keypair.publicKey)
     let publicKeyString = Buffer.from(publicKeyRaw).toString('base64')
