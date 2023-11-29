@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "@jeswr/pretty-turtle": "^1.4.0",
-    "@types/n3": "^1.16.4",
-    "n3": "github:rdfjs/N3.js#fd6e7f1d5982fa113349a6ad03ad99e52db898d7"
-  }
-}
