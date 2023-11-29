@@ -41,7 +41,7 @@ export async function validateSignatures(data: Store) {
         quad(
           subject,
           namedNode('https://example.org/ns/signature#signatureHasBeenVerified'),
-          literal('true', 'http://www.w3.org/2001/XMLSchema#boolean'),
+          literal('true', namedNode('http://www.w3.org/2001/XMLSchema#boolean')),
           graph
         )
       );
