@@ -1,23 +1,5 @@
-import { SolidLib } from './SolidLib/Interface/SolidLib'
-import { startPod } from './SolidPod/index'
-import { run as runCompanyAPI } from './ExternalServices/companyAPI'
-import { run as runFlandersAPI } from './ExternalServices/flandersAPI'
-
-async function setup() {
-    console.log('')
-    console.log('######################################')
-    console.log('Setting Up External APIs to fetch data')
-    console.log('######################################')
-    console.log('')
-    runCompanyAPI()
-    runFlandersAPI()
-    console.log('')
-    console.log('######################################')
-    console.log('Setting up Pod Interfaces')
-    console.log('######################################')
-    console.log('')
-    startPod()
-}
+import { SolidLib } from './SolidLib/Interface/SolidLib';
+import { setup } from './setup';
 
 async function getDataFlow() {
     
@@ -40,7 +22,7 @@ async function getDataFlow() {
 }
 
 async function run() {
-    await setup()
+    const close = await setup()
 
     console.log('')
     console.log('######################################')
@@ -48,6 +30,7 @@ async function run() {
     console.log('######################################')
     console.log('')
     await getDataFlow()
+    await close();
 }
 
 
