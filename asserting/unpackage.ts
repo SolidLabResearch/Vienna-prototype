@@ -60,58 +60,7 @@ async function unpackage() {
     :Jesse rot:trusts <http://localhost:3456/flandersgov/id> .
   `
 
-  // console.log(store.size);
   await validateSignatures(store);
-  // console.log(store.size)
-
-  // console.log(await write([...store], {
-  //   format: 'text/n3',
-  //   prefixes
-  // }));
-
-  // const allData = new Store([...extractedContent, ...store]);
-
-  // This should be the job of a reasoner [bring all verified signatures to the top]
-  // for (const { subject, predicate, graph } of allData.match(null, DF.namedNode('https://example.org/ns/signature#signatureHasBeenVerified'), null)) {
-  //   const [signaure] = allData.getObjects(subject, DF.namedNode('https://example.org/ns/signature#hasContentSignature'), graph);
-  //   const [issuer] = allData.getObjects(signaure, DF.namedNode('https://example.org/ns/signature#issuer'), graph);
-  //   // allData.getObjects()
-
-  //   const g = DF.blankNode();
-  //   allData.add(DF.quad(
-  //     DF.blankNode(),
-  //     DF.namedNode('https://example.org/ns/package#packages'),
-  //     g,
-  //     DF.defaultGraph()
-  //   ))
-
-  //   for (const data of allData.match(subject as any, null, null, graph as any)) {
-  //     console.log(data)
-  //     allData.add(
-  //       DF.quad(
-  //         data.subject,
-  //         data.predicate,
-  //         data.object,
-  //         g
-  //       )
-  //     )
-  //   }
-
-  //   console.log(await write([...store], {
-  //     format: 'text/n3', prefixes
-  //   }))
-
-  //   // const r = allData.getSubjects(DF.namedNode('https://example.org/ns/package#content'), signaure, graph);
-
-  //   // const g = DF.blankNode();
-
-  //   // allData.add(DF.quad(
-  //   //   DF.blankNode(),
-  //   //   DF.namedNode('https://example.org/ns/package#packages'),
-  //   //   DF.blankNode(),
-  //   // ))
-  // }
-
   const reasoningResult = await n3reasoner([await write([...store], {
     format: 'text/n3',
     prefixes
