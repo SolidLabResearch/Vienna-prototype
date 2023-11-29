@@ -24,11 +24,23 @@ async function unpackage() {
       'Content-Type': 'text/n3',
       'user-agent': 'https://www.jeswr.org/#me'
     },
-    body: ':Ruben :age _:X .'
+    body: ':Ruben :age ?x .'
   });
 
   const extractedContent = new Store();
   const store = new Store(new Parser({ format: 'text/n3' }).parse(await res.text()));
+
+  for (const data of store.match(null, DF.namedNode('https://example.org/ns/package#packages'), null, DF.defaultGraph())) {
+    store.add(
+      DF.quad(
+        data.subject,
+        DF.namedNode('https://example.org/ns/package#assertedBy'),
+        DF.namedNode(bobEndpoint),
+        DF.defaultGraph()
+      )
+    )
+  }
+
 
   // This is the data living in the users global context
   // const trustStore = new Store(new Parser({ format: 'text/n3' }).parse(`
