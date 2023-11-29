@@ -9,6 +9,11 @@ import { validateSignatures } from '../../SolidPod/Util/packaging/validateSignat
 const { namedNode } = DataFactory
 
 export class SolidLib {
+    // hardcoded interface Urls
+    private adminInterfaceUrl: string = "http://localhost:8060/"
+    private AuthZInterfaceUrl: string = "http://localhost:8050/"
+    private dataInterfaceUrl: string = "http://localhost:8040/bob/endpoint" // TODO:: how to get NAME value here?
+
     private session: Session | undefined;
 
     private readonly prefixes = {
@@ -61,8 +66,6 @@ export class SolidLib {
     }
 
     public async getData(query: string, purpose: string[]): Promise<DataPlusPlus> {
-        // TODO:: how to get NAME value here?
-        const dataInterfaceURI = "http://localhost:8040/bob/endpoint"
         // stubbed: Don't have access
         console.log(`SolidLib]:getData - No access, need AuthZ token.`)
         const authZRequestMessage: SolidAuthZRequestMessage = {
@@ -86,7 +89,7 @@ export class SolidLib {
         }
 
         // session.fetch already has a lot of stuff in the authorization token
-        let response = await fetch(dataInterfaceURI, {
+        let response = await fetch(this.dataInterfaceUrl, {
             method: "POST",
             headers: {
                 "content-type": "text/n3",
@@ -201,13 +204,11 @@ export class SolidLib {
     }
 
     public async addPolicy(policy: string): Promise<boolean> {
-        const adminInterfaceUrl = "http://localhost:8060/"
-
         if (!this.session) {
             throw Error("No session")
         }
 
-        let response = await this.session.fetch(adminInterfaceUrl, {
+        let response = await this.session.fetch(this.adminInterfaceUrl, {
             method: "POST",
             headers: {
                 "content-type": "text/turtle"
@@ -232,7 +233,7 @@ export class SolidLib {
         const authZToken = await (await this.getAuthZToken(authZRequestMessage)).token
         console.log(`SolidLib]:addPolicy - Now that token is there, add Policy`, authZToken)
 
-        response = await fetch(adminInterfaceUrl, {
+        response = await fetch(this.adminInterfaceUrl, {
             method: "POST",
             headers: {
                 authorization: `${authZToken.type} ${authZToken.access_token}`,
@@ -247,15 +248,15 @@ export class SolidLib {
 
     }
 
+    // note: Wout comment: I think it will only be one agreement per authztoken.
     private async getAuthZToken(authZRequestMessage: SolidAuthZRequestMessage): Promise<{ token: AuthZToken, agreements: Agreement[] }> {
-        const AuthZInterfaceURL = "http://localhost:8050/" // Note: hardcoded
-        const agreements: Agreement[] = []
+        const agreements: Agreement[] = [] 
         if (!this.session) {
             throw Error("No session")
         }
 
-        console.log(`[SolidLib]:getAuthZToken - Requesting Authorization token at ${AuthZInterfaceURL}.`)
-        const res = await this.session.fetch(AuthZInterfaceURL, {
+        console.log(`[SolidLib]:getAuthZToken - Requesting Authorization token at ${this.AuthZInterfaceUrl}.`)
+        const res = await this.session.fetch(this.AuthZInterfaceUrl, {
             method: "POST",
             headers: {
                 "content-type": "application/json"
@@ -291,10 +292,9 @@ export class SolidLib {
                 policy: preObligationRequest.value.policy
             }
 
-            // TODO:: WOUT :: Like this?
             agreements.push(agreement as Agreement);
 
-            const agreementResponse = await this.session.fetch(AuthZInterfaceURL, {
+            const agreementResponse = await this.session.fetch(this.AuthZInterfaceUrl, {
                 method: "POST",
                 headers: {
                     "content-type": "application/json"

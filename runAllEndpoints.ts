@@ -1,4 +1,3 @@
-import { SolidLib } from './SolidLib/Interface/SolidLib';
 import { setup } from './setup';
 
 async function run() {
@@ -20,6 +19,4 @@ async function run() {
     process.exit()
   })
 }
-
-
 run()
