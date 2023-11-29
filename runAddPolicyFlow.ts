@@ -14,15 +14,9 @@ async function addPolicy() {
     await solidLib.logout();
 }
 
-function timeout(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 async function run() {
     const close = await setup()
 
-    await timeout(500);
-    
     console.log('')
     console.log('######################################')
     console.log('Running Experiment')
