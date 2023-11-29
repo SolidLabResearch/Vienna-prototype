@@ -88,6 +88,12 @@ export class SolidLib {
 
     }
 
+    public async getDataWithTrust(query: string, purpose: string[]): Promise<any> {
+        let dataplusplus = await this.getData(query, purpose)
+        
+        // TODO:: JESSE :: whatever u want
+    }
+
     public async addPolicy(policy: string): Promise<boolean> {
         const adminInterfaceUrl = "http://localhost:8060/"
 
