@@ -2,7 +2,7 @@ import {Session} from "@rubensworks/solid-client-authn-isomorphic";
 import {buildAuthenticatedFetch, createDpopHeader, generateDpopKeyPair} from "@inrupt/solid-client-authn-core";
 
 import {SOLID} from "@solid/community-server";
-import {storeToString, turtleStringToStore} from "./Util";
+import {turtleStringToStore} from "./Util";
 import { DataFactory } from "n3";
 const namedNode = DataFactory.namedNode
 
