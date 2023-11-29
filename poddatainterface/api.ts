@@ -56,13 +56,20 @@ async function run() {
 
     app.post(`/${name}/endpoint`, async (req: any, res: any) => {
         let body = req.body
+        let match;
 
-        let parser = new n3.Parser({format: "text/n3"}) 
-        let match = await parser.parse(body)
+        try {
+            let parser = new n3.Parser({format: "text/n3"}) 
+            match = await parser.parse(body)
+        } catch (e) {
+            res.status(400)
+            res.send('Please provide a valid RDF triple as a request.\n')
+            return
+        }
 
         if (!match || match.length !== 1) {
             res.status(400)
-            res.send('Please provide a single triple as a match for the request body')
+            res.send('Please provide a single triple as a match for the request body.\n')
             return;
         }
         let matchTriple = match[0]
