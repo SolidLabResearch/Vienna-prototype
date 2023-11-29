@@ -1,7 +1,0 @@
-@prefix ex: <http://example.org/> .
-
-{
-  ?s ?p ?o .
-} => {
-  ?s ?p ?o .
-} .
