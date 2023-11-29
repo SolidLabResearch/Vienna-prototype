@@ -48,9 +48,9 @@
 # This is a hack; we really want to make this a globally scoped thing like above.
 {
   ?package log:includes {
-    _:b1 sign:hasContentSignature [
+     [] sign:hasContentSignature [
       sign:issuer ?issuer ;
-      <https://example.org/ns/signature#signatureHasBeenVerified> true ;
+      sign:signatureHasBeenVerified true ;
     ] .
   } ;
     # We can add this as data is incoming for now as well.
