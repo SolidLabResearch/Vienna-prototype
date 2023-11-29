@@ -24,7 +24,8 @@ async function unpackage() {
       'Content-Type': 'text/n3',
       'user-agent': 'https://www.jeswr.org/#me'
     },
-    body: '?S ?P ?O .'
+    // body: '?S ?P ?O .'
+    body: '<http://localhost:3123/bob/id> <https://www.w3.org/2006/vcard/ns#bday> ?O .'
   });
 
   const extractedContent = new Store();
