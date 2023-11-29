@@ -2,6 +2,8 @@
 
 
 ## Installing everything
+*Note* This code only works on Node 20+
+
 ```
 cd packaging
 npm install
