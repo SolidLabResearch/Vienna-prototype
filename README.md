@@ -56,12 +56,12 @@ npm run serve
 
 We can retrieve the birthdate using the app flow.
 ```
-ts-node runAppFlow.ts
+ts-node runAppGetDataFlow.ts
 ```
 
 We can retrieve all trusted data using the trusted data app flow.
 ```
-ts-node runAppFlowAll.ts
+ts-node runAppGetDataTrustFlow.ts
 ```
 
 ## Running the AddPolicy flow
