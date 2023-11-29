@@ -60,60 +60,10 @@ async function unpackage() {
     :Jesse rot:trusts <http://localhost:3456/flandersgov/id> .
   `
 
-  // console.log(store.size);
   await validateSignatures(store);
-  // console.log(store.size)
-
-  // console.log(await write([...store], {
-  //   format: 'text/n3',
-  //   prefixes
-  // }));
-
-  // const allData = new Store([...extractedContent, ...store]);
-
-  // This should be the job of a reasoner [bring all verified signatures to the top]
-  // for (const { subject, predicate, graph } of allData.match(null, DF.namedNode('https://example.org/ns/signature#signatureHasBeenVerified'), null)) {
-  //   const [signaure] = allData.getObjects(subject, DF.namedNode('https://example.org/ns/signature#hasContentSignature'), graph);
-  //   const [issuer] = allData.getObjects(signaure, DF.namedNode('https://example.org/ns/signature#issuer'), graph);
-  //   // allData.getObjects()
-
-  //   const g = DF.blankNode();
-  //   allData.add(DF.quad(
-  //     DF.blankNode(),
-  //     DF.namedNode('https://example.org/ns/package#packages'),
-  //     g,
-  //     DF.defaultGraph()
-  //   ))
-
-  //   for (const data of allData.match(subject as any, null, null, graph as any)) {
-  //     console.log(data)
-  //     allData.add(
-  //       DF.quad(
-  //         data.subject,
-  //         data.predicate,
-  //         data.object,
-  //         g
-  //       )
-  //     )
-  //   }
-
-  //   console.log(await write([...store], {
-  //     format: 'text/n3', prefixes
-  //   }))
-
-  //   // const r = allData.getSubjects(DF.namedNode('https://example.org/ns/package#content'), signaure, graph);
-
-  //   // const g = DF.blankNode();
-
-  //   // allData.add(DF.quad(
-  //   //   DF.blankNode(),
-  //   //   DF.namedNode('https://example.org/ns/package#packages'),
-  //   //   DF.blankNode(),
-  //   // ))
-  // }
-
   const reasoningResult = await n3reasoner([await write([...store], {
     format: 'text/n3',
+    prefixes
   }), `
   @prefix log: <http://www.w3.org/2000/10/swap/log#> .
   @prefix dcterms: <http://purl.org/dc/terms/>.
@@ -171,16 +121,24 @@ async function unpackage() {
   } => ?content .
   `, trust]);
 
+  console.log('='.repeat(100))
+  console.log('The packaged data is:')
+  console.log(await write([...store], {
+    format: 'text/n3',
+    prefixes
+  }))
+  console.log('='.repeat(100))
+
   const reasonedStore = new Store(new Parser({ format: 'text/n3' }).parse(reasoningResult));
 
   const data = [...reasonedStore.match(null, null, null, DF.defaultGraph())].filter(
     term => term.object.termType !== 'BlankNode' || reasonedStore.match(null, null, null, term.object as any).size === 0
   )
-
+  
+  console.log('The merged data is:')
   console.log(await write(data, {
     format: 'text/n3'
   }))
-
 }
 
 unpackage();
