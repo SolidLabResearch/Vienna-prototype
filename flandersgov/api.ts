@@ -1,4 +1,4 @@
-const express = require('express')
+import express from 'express';
 const app = express()
 const port = 3456
 
@@ -25,10 +25,13 @@ async function run() {
     let publicKeyRaw = await crypto.subtle.exportKey("raw", keypair.publicKey)
     let publicKeyString = Buffer.from(publicKeyRaw).toString('base64')
 
-    //@ts-ignore
     app.get('/flandersgov/endpoint/dob', async (req, res) => {
         let id = req.query.id
-        console.log(id)
+        
+        
+        if (typeof id !== 'string') {
+            return res.status(500).send("id must be a string")
+        }
 
         
         let bdateTriple = n3.DataFactory.quad(
@@ -48,11 +51,9 @@ async function run() {
 
         let content = await signContent(tripleString, govid, keypair.privateKey)
 
-        res.send(content)
+        res.status(200).contentType('text/n3').send(content)
     })
 
-
-    //@ts-ignore
     app.get('/flandersgov/id', async (req, res) => {
 
         let webId = 
@@ -63,7 +64,7 @@ async function run() {
     foaf:homepage <https://www.vlaanderen.be>;
     <http://www.w3.org/ns/auth/cert#key>  "${publicKeyString}".
 `
-        res.send(webId)
+        res.status(200).contentType('text/turtle').send(webId)
     })
 
 

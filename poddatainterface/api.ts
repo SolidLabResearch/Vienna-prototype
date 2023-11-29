@@ -1,4 +1,4 @@
-const express = require('express')
+import express from 'express';
 const app = express()
 const port = 3123
 
@@ -53,8 +53,6 @@ async function run() {
     let publicKeyString = Buffer.from(publicKeyRaw).toString('base64')
 
     // The Dialog endpoint, a get request will trigger an error
-
-    //@ts-ignore
     app.get(`/${name}/endpoint`, async (req, res) => {
 
         res.status(400)
@@ -62,7 +60,6 @@ async function run() {
         res.send("Please do a POST request to this endpoint with the dialog message as body")
     })
 
-    //@ts-ignore
     app.post(`/${name}/endpoint`, async (req, res) => {
         let body = req.body
         console.log("request body", body)
@@ -83,11 +80,9 @@ async function run() {
         let signedPackage = await signContent(packagedBdate, webid, keypair.privateKey)
         
         // Send the response
-        res.send(signedPackage)
+        res.status(200).contentType('text/n3').send(signedPackage)
     })
 
-
-    //@ts-ignore
     app.get(`/${name}/id`, async (req, res) => {
 
         let webId = 
@@ -97,7 +92,7 @@ async function run() {
     foaf:name "${name}"@en;
     <http://www.w3.org/ns/auth/cert#key>  "${publicKeyString}".
 `
-        res.send(webId)
+        res.status(200).contentType('text/turtle').send(webId)
     })
 
 
@@ -117,7 +112,7 @@ ${endpoint}`
 
 }
 
-function getMatchFromTripleStore(store: n3.Store, match: n3.Quad)
+// function getMatchFromTripleStore(store: n3.Store, match: n3.Quad)
 
 
 run()
