@@ -2,7 +2,7 @@ import { n3reasoner } from 'eyereasoner';
 import { Store, Parser, DataFactory as DF } from 'n3';
 import { Term } from '@rdfjs/types';
 import { write } from '@jeswr/pretty-turtle';
-import { validateSignatures } from '../packaging/validateSignatures';
+import { validateSignatures } from '../../../SolidPod/Util/packaging/validateSignatures';
 
 const prefixes = {
   pack: 'https://example.org/ns/package#',
@@ -24,7 +24,6 @@ async function unpackage() {
       'Content-Type': 'text/n3',
       'user-agent': 'https://www.jeswr.org/#me'
     },
-    // body: '?S ?P ?O .'
     body: '<http://localhost:3123/bob/id> <https://www.w3.org/2006/vcard/ns#bday> ?O .'
   });
 
