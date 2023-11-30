@@ -1,8 +1,8 @@
 import { SolidLib } from './SolidLib/Interface/SolidLib';
-import { setup } from './setup';
+import { clearStores, setup } from './setup';
 
 async function addPolicy() {
-    const solidLib = new SolidLib("admin-App");
+    const solidLib = new SolidLib("admin-App", 'steve');
     await solidLib.login()
     await solidLib.addPolicy(`
 <myPolicy> <a> <Policy>;
@@ -15,7 +15,8 @@ async function addPolicy() {
 }
 
 async function run() {
-    const close = await setup()
+    clearStores()
+    const close = await setup('steve')
 
     console.log('')
     console.log('######################################')

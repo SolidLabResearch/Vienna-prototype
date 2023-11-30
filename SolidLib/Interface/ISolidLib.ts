@@ -15,7 +15,12 @@ export type AuthZToken = {
     type: string
 }
 
-export type Policy = string
+export type Policy = {
+    "access-mode": string,
+    "resource": string,
+    "purpose": string,
+    "actor": string,
+}
 
 export type DataPlusPlus = {
     agreements: Agreement[],
@@ -104,9 +109,10 @@ export type SolidAuthZRequestMessage = {
 }
 
 export type AuthZInterfaceResponse = {
-    result: boolean,                        // Yes or No
+    result: AuthZInterfaceResponseResult,       // Yes or No 
     authZToken?: AuthZToken,                // Yes and, ALWAYS THERE WHEN YES
-    preObligation?: PreObligationRequest    // No but, MAY BE HERE WHEN NO
+    preObligation?: PreObligationRequest,    // No but, MAY BE HERE WHEN NO
+    error?: string
 }
 
 export type PolicyRequestMessage = {
@@ -115,3 +121,8 @@ export type PolicyRequestMessage = {
     authZToken: AuthZToken
 }
 
+export enum AuthZInterfaceResponseResult {
+    Error = "Error",
+    Token = "Token",
+    Obligation = "Obligation"
+}

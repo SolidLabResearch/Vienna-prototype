@@ -80,10 +80,19 @@ export class SolidLib {
             purpose: purpose,
             agreement: undefined
         }
+        let authZToken: AuthZToken;
+        let resultingAgreements: Agreement[];
+        try {
+            const tokenCall = await this.getAuthZToken(authZRequestMessage)
+            authZToken = tokenCall.token
+            resultingAgreements = tokenCall.agreements
+        } catch (e){
+            console.log(`[SolidLib]:getData - No token obtained.`)
+            throw e
+            
+        }
 
-        const { token: authZToken, agreements: resultingAgreements } = await this.getAuthZToken(authZRequestMessage)
-
-        console.log(`SolidLib]:getData - Now that token is there, fetch data`, authZToken)
+        console.log(`[SolidLib]:getData - Now that token is there, fetch data`, authZToken)
 
         if (!this.session) {
             throw Error("No session")
@@ -277,7 +286,10 @@ export class SolidLib {
 
         if (res.status === 401) {
             const preObligationRequest: any = await res.json()
-            console.log(`[SolidLib]:getAuthZToken - No Authorization token received; Received status code ${res.status} with following error message: ${preObligationRequest.type}.`)
+            console.log(`[SolidLib]:getAuthZToken - No Authorization token received; Received status code ${res.status} with following error message: ${preObligationRequest.type ?? preObligationRequest.error}.`)
+            if (preObligationRequest.error) {
+                throw Error(preObligationRequest.error)
+            }
             console.log(`[SolidLib]:getAuthZToken - Signing "pod signed Instantiated Policy".`)
 
             // Note: maybe this can be recursive?

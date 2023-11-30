@@ -1,5 +1,5 @@
 import { SolidLib } from './SolidLib/Interface/SolidLib';
-import { setup } from './setup';
+import { clearStores, setup } from './setup';
 
 async function getDataFlow() {
     const solidLib = new SolidLib("food-store");
@@ -21,6 +21,7 @@ async function getDataFlow() {
 } 
 
 async function run() {
+    clearStores()
     const close = await setup('steve')
 
     console.log('')
