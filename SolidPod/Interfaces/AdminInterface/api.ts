@@ -2,6 +2,8 @@ import express from 'express'
 import bodyParser from 'body-parser';
 import { PolicyStore } from '../../Util/Storage';
 import { Server} from 'http';
+import { ServiceInfo } from '../..';
+import { PublicInterface } from '../PublicInterface';
 const app = express()
 const port = 8060
 app.use(bodyParser.text({ type: 'text/turtle' }));
@@ -49,15 +51,14 @@ app.post('/', async (req, res) => {
 })
 
 
-export class AdminInterface{
-    private server: Server | undefined;
-    public start(port: number): void{
+export class AdminInterface extends PublicInterface{
+    public async start(port: number){
         this.server = app.listen(port, () => {
             console.log(`Admin Interface listening on ${port}`)
             console.log(`URI: http://localhost:${port}/`)
         })
     }
-    public stop():void {
+    public async stop() {
         this.server?.close();
     }
 }

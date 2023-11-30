@@ -4,6 +4,7 @@ import { LogStore, PolicyStore } from '../../Util/Storage';
 import { Server} from 'http';
 import { Agreement } from '../../../SolidLib/Interface/ISolidLib';
 import * as n3 from "n3"
+import { PublicInterface } from '../PublicInterface';
 
 const app = express()
 const port = 8030
@@ -59,15 +60,16 @@ app.get ('/', async (req, res) => {
         .send(logEntries)
 })
 
-export class LogInterface{
-    private server: Server | undefined;
-    public start(port: number): void{
+export class LogInterface extends PublicInterface{
+    
+    public async start(port: number) {
         this.server = app.listen(port, () => {
             console.log(`Log Interface listening on ${port}`)
             console.log(`URI: http://localhost:${port}/`)
         })
     }
-    public stop():void {
+
+    public async stop() {
         this.server?.close();
     }
 }

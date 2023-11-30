@@ -4,6 +4,8 @@ import express, { query } from 'express'
 import { PolicyStore } from '../../Util/Storage';
 import { Store, DataFactory } from 'n3';
 import { storeToString } from '../../Util/Util';
+import { ServiceInfo } from '../..';
+import { PublicInterface } from '../PublicInterface';
 const { namedNode } = DataFactory
 const app = express()
 const port = 8050
@@ -202,15 +204,15 @@ async function policyNegotiation(authZRequestMessage: any, client_id: string, ac
 }
 
 
-export class AuthZInterface {
-  private server: Server | undefined;
-  public start(port: number): void {
+export class AuthZInterface extends PublicInterface{
+  public async start(port: number){
     this.server = app.listen(port, () => {
       console.log(`Authorization Interface listening on ${port}`)
       console.log(`URI: http://localhost:${port}/`)
     })
   }
-  public async stop(): Promise<void> {
+  
+  public async stop(){
     await new Promise<any>(res => this.server?.close(res));
   }
 }

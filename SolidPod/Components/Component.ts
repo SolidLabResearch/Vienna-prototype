@@ -1,6 +1,10 @@
-export abstract class Component {
-    
-    abstract start(): Promise<void>;
+import { ServiceInfo } from "..";
 
-    abstract close(): Promise<void>;
+export abstract class Component {
+
+    constructor(protected info: ServiceInfo) {}
+    
+    public abstract start(): Promise<void>;
+
+    public abstract close(): Promise<void>;
 }
