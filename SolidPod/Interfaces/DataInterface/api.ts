@@ -19,9 +19,7 @@ let tripleStore = new n3.Store();
 const packagePredicate = "https://example.org/ns/package#packages"
 const contentPredicate = "https://example.org/ns/package#content"
 
-export async function runInterface(port: number) {
-
-    let name = process.argv[2]
+export async function runInterface(port: number, name?: string) {
 
     name = name || "bob"
 
