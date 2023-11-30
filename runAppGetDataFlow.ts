@@ -18,7 +18,7 @@ async function getDataFlow() {
     console.log('Logged Agreements:')
     console.log(logEntries)
     await solidLib.logout()
-    
+} 
 
 async function run() {
     const close = await setup()
