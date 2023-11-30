@@ -50,7 +50,9 @@ app.post('/', async (req, res) => {
     case ResourceType.POLICY:
       // give token related to owner is allowed to interact with admin
       console.log(`[${new Date().toISOString()}] - Authz: ${actor} (client: ${client_id}) requesting to add policy.`)
-
+      if (client_id!=="admin-App") {
+        console.log(`[${new Date().toISOString()}] - Authz: SHOULD NOT BE ALLOWED TO GET A TOKEN DUE TO WRONG APP.`)
+      }
       authZInterfaceResponse = {
         result: true,
         authZToken: {
@@ -62,7 +64,9 @@ app.post('/', async (req, res) => {
     case ResourceType.LOG:
       // give token related to owner is allowed to interact with log
       console.log(`[${new Date().toISOString()}] - Authz: ${actor} (client: ${client_id}) requesting to add read agreements.`)
-
+      if (client_id!=="admin-App") {
+        console.log(`[${new Date().toISOString()}] - Authz: SHOULD NOT BE ALLOWED TO GET A TOKEN DUE TO WRONG APP.`)
+      }
       authZInterfaceResponse = {
         result: true,
         authZToken: {
