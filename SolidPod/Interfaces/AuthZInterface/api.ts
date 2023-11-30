@@ -225,35 +225,36 @@ async function matchPolicy(args: {
   // getPolicy (should loop over all policies)
   let policy: Policy | undefined
   const storedPolicies: Store = await policyStore.readAll()
-  const policyNode = storedPolicies.getQuads(null, null, namedNode('Policy'), null)[0].subject;
-  const policySubject = storedPolicies.getQuads(policyNode, namedNode('subject'), null, null)[0].object.value;
-  const policyAction = storedPolicies.getQuads(policyNode, namedNode('action'), null, null)[0].object.value;
-  const policyResource = storedPolicies.getQuads(policyNode, namedNode('resource'), null, null)[0].object.value;
-  const policyContext = storedPolicies.getQuads(policyNode, namedNode('context'), null, null)[0].object.value;
+  const policyNodes = storedPolicies.getQuads(null, null, namedNode('Policy'), null)
+  for (const policyNode of policyNodes) {
+    const policySubject = storedPolicies.getQuads(policyNode.subject, namedNode('subject'), null, null)[0].object.value;
+    const policyAction = storedPolicies.getQuads(policyNode.subject, namedNode('action'), null, null)[0].object.value;
+    const policyResource = storedPolicies.getQuads(policyNode.subject, namedNode('resource'), null, null)[0].object.value;
+    const policyContext = storedPolicies.getQuads(policyNode.subject, namedNode('context'), null, null)[0].object.value;
+    // match policy (currently matches last policy that matches if there are multiple matches)
 
-  // match policy
+    if (policySubject === args.subject &&
+      policyAction === args.action &&
+      policyResource === args.resource &&
+      args.purpose.some(v => v === policyContext)) {
+      // the policy is instantiated based on what is in the store | that is all the negotiation fo rnow
+      // console.log({
+      //   "access-mode": policyAction,
+      //   "resource": policyResource,
+      //   "purpose": policyContext,
+      //   "actor": policySubject
+      // });
+      console.log(`[${new Date().toISOString()}] - Authz-Policy-Matching: Found a match.`)
+      policy = {
+        "access-mode": policyAction,
+        actor: policySubject,
+        resource: policyResource,
+        purpose: policyContext
+      }
+    } else {
+      console.log(`[${new Date().toISOString()}] - Authz-Policy-Matching: No match found.`)
 
-  if (policySubject === args.subject &&
-    policyAction === args.action &&
-    policyResource === args.resource &&
-    args.purpose.some(v => v === policyContext)) {
-    // the policy is instantiated based on what is in the store | that is all the negotiation fo rnow
-    // console.log({
-    //   "access-mode": policyAction,
-    //   "resource": policyResource,
-    //   "purpose": policyContext,
-    //   "actor": policySubject
-    // });
-    console.log(`[${new Date().toISOString()}] - Authz-Policy-Matching: Found a match.`)
-    policy = {
-      "access-mode": policyAction,
-      actor: policySubject,
-      resource: policyResource,
-      purpose: policyContext
     }
-  } else {
-    console.log(`[${new Date().toISOString()}] - Authz-Policy-Matching: No match found.`)
-
   }
 
   return policy
