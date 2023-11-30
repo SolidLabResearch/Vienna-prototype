@@ -71,13 +71,13 @@ ts-node runAddPolicyFlow.ts
 
 ## TODO's
 
-- [ ] auditFlow: have log inteface so that end user can check agreements to start an audit
-  - [ ] audit interface
-  - [ ] solidlib: getAgreements
-  - [ ] getData: at end store agreements to Log interface (executed by authZ interface)
+- [X] auditFlow: have log inteface so that end user can check agreements to start an audit
+  - [X] audit interface
+  - [X] solidlib: getAgreements
+  - [X] getData: at end store agreements to Log interface (executed by authZ interface)
 - [ ] Small policy checking at authz
   - [ ] breaking: getData flow will not work stand-alone then (unless policy is added at disk through PolicyStore)
 - [ ] cleanData method
   - [ ] clears stored agreements
   - [ ] clears stored policies
-- [ ] Integrate auditflow in runAppFlow.ts
+- [X] Integrate auditflow in runAppFlow.ts
