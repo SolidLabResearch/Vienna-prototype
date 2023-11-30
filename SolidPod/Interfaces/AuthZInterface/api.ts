@@ -1,10 +1,13 @@
-import { AuthZInterfaceResponse } from '../../../SolidLib/Interface/ISolidLib'
+import { AuthZInterfaceResponse, AuthZInterfaceResponseResult, Policy } from '../../../SolidLib/Interface/ISolidLib'
 import { Server } from 'http';
-import express from 'express'
-
+import express, { query } from 'express'
+import { PolicyStore } from '../../Util/Storage';
+import { Store, DataFactory } from 'n3';
+import { storeToString } from '../../Util/Util';
+const { namedNode } = DataFactory
 const app = express()
 const port = 8050
-
+const policyStore = new PolicyStore()
 app.use(express.json())
 
 app.post('/', async (req, res) => {
@@ -42,19 +45,19 @@ app.post('/', async (req, res) => {
   // checking what the target is for the resource | data or policies
   const requestType = checkRequest(authZRequestMessage.resource)
   console.log(`[${new Date().toISOString()}] - Authz: Request type: ${requestType}.`)
-  
+
   let authZInterfaceResponse: AuthZInterfaceResponse = {
-    result: false
+    result: AuthZInterfaceResponseResult.Error
   }
   switch (requestType) {
     case ResourceType.POLICY:
       // give token related to owner is allowed to interact with admin
       console.log(`[${new Date().toISOString()}] - Authz: ${actor} (client: ${client_id}) requesting to add policy.`)
-      if (client_id!=="admin-App") {
+      if (client_id !== "admin-App") {
         console.log(`[${new Date().toISOString()}] - Authz: SHOULD NOT BE ALLOWED TO GET A TOKEN DUE TO WRONG APP.`)
       }
       authZInterfaceResponse = {
-        result: true,
+        result: AuthZInterfaceResponseResult.Token,
         authZToken: {
           access_token: "verySecretToken.Allowed-to-add-policy",
           type: 'Bearer' // maybe Dpop, I don't fucking know
@@ -64,11 +67,11 @@ app.post('/', async (req, res) => {
     case ResourceType.LOG:
       // give token related to owner is allowed to interact with log
       console.log(`[${new Date().toISOString()}] - Authz: ${actor} (client: ${client_id}) requesting to add read agreements.`)
-      if (client_id!=="admin-App") {
+      if (client_id !== "admin-App") {
         console.log(`[${new Date().toISOString()}] - Authz: SHOULD NOT BE ALLOWED TO GET A TOKEN DUE TO WRONG APP.`)
       }
       authZInterfaceResponse = {
-        result: true,
+        result: AuthZInterfaceResponseResult.Token,
         authZToken: {
           access_token: "verySecretToken.Allowed-to-read-agreements",
           type: 'Bearer' // maybe Dpop, I don't fucking know
@@ -84,14 +87,21 @@ app.post('/', async (req, res) => {
   let statusCode = 0
   let body: any = {}
 
-  if (authZInterfaceResponse.result) {
-    statusCode = 200
-    body = authZInterfaceResponse.authZToken
-    console.log(`[${new Date().toISOString()}] - Authz: Returning AuthZ token.`)
-  }
-  else {
-    statusCode = 401
-    body = authZInterfaceResponse.preObligation
+  switch (authZInterfaceResponse.result) {
+    case (AuthZInterfaceResponseResult.Token):
+      statusCode = 200
+      body = authZInterfaceResponse.authZToken
+      console.log(`[${new Date().toISOString()}] - Authz: Returning AuthZ token.`)
+      break;
+    case (AuthZInterfaceResponseResult.Obligation):
+      statusCode = 401
+      body = authZInterfaceResponse.preObligation
+      break;
+    case AuthZInterfaceResponseResult.Error:
+      statusCode = 401
+      body = { error: authZInterfaceResponse.error }
+      break;
+
   }
 
 
@@ -130,16 +140,24 @@ enum ResourceType {
 
 async function policyNegotiation(authZRequestMessage: any, client_id: string, actor: string): Promise<AuthZInterfaceResponse> {
   let authZInterfaceResponse: AuthZInterfaceResponse = {
-    result: false
+    result: AuthZInterfaceResponseResult.Error
+
   }
   if (authZRequestMessage.agreement === null) {
-    // TODO: get and match policy
     console.log(`[${new Date().toISOString()}] - Authz: "${client_id}" Requesting ${authZRequestMessage['access-mode']} for ${authZRequestMessage.resource} with purpose`, authZRequestMessage.purpose)
-
-    // Policy matching here | stubbed
+    const policy = await matchPolicy({
+      subject: client_id,
+      action: authZRequestMessage["access-mode"],
+      resource: authZRequestMessage.resource,
+      purpose: authZRequestMessage.purpose
+    })
+    if (!policy) {
+      authZInterfaceResponse.error = 'no policy match'
+      return authZInterfaceResponse
+    }
     // if we have policies, authzresponse should be created based on that and the request
     authZInterfaceResponse = {
-      result: false,
+      result: AuthZInterfaceResponseResult.Obligation,
       preObligation: {
         type: "signObligation",
         value: {
@@ -148,12 +166,7 @@ async function policyNegotiation(authZRequestMessage: any, client_id: string, ac
             issuer: "Pod",
             value: "hash"
           },
-          "policy": {
-            "access-mode": "read",
-            "resource": "date_of_birth",
-            "purpose": "verification",
-            "actor": client_id
-          }
+          "policy": policy
         }
       }
     }
@@ -177,7 +190,7 @@ async function policyNegotiation(authZRequestMessage: any, client_id: string, ac
 
 
     authZInterfaceResponse = {
-      result: true,
+      result: AuthZInterfaceResponseResult.Token,
       authZToken: {
         access_token: "verySecretToken.Allowed-to-read-dob.",
         type: 'Bearer' // maybe Dpop, I don't fucking know
@@ -200,4 +213,48 @@ export class AuthZInterface {
   public async stop(): Promise<void> {
     await new Promise<any>(res => this.server?.close(res));
   }
+}
+
+async function matchPolicy(args: {
+  subject: string,
+  action: string,
+  resource: string,
+  purpose: string[]
+
+}): Promise<Policy | undefined> {
+  // getPolicy (should loop over all policies)
+  let policy: Policy | undefined
+  const storedPolicies: Store = await policyStore.readAll()
+  const policyNode = storedPolicies.getQuads(null, null, namedNode('Policy'), null)[0].subject;
+  const policySubject = storedPolicies.getQuads(policyNode, namedNode('subject'), null, null)[0].object.value;
+  const policyAction = storedPolicies.getQuads(policyNode, namedNode('action'), null, null)[0].object.value;
+  const policyResource = storedPolicies.getQuads(policyNode, namedNode('resource'), null, null)[0].object.value;
+  const policyContext = storedPolicies.getQuads(policyNode, namedNode('context'), null, null)[0].object.value;
+
+  // match policy
+
+  if (policySubject === args.subject &&
+    policyAction === args.action &&
+    policyResource === args.resource &&
+    args.purpose.some(v => v === policyContext)) {
+    // the policy is instantiated based on what is in the store | that is all the negotiation fo rnow
+    // console.log({
+    //   "access-mode": policyAction,
+    //   "resource": policyResource,
+    //   "purpose": policyContext,
+    //   "actor": policySubject
+    // });
+    console.log(`[${new Date().toISOString()}] - Authz-Policy-Matching: Found a match.`)
+    policy = {
+      "access-mode": policyAction,
+      actor: policySubject,
+      resource: policyResource,
+      purpose: policyContext
+    }
+  } else {
+    console.log(`[${new Date().toISOString()}] - Authz-Policy-Matching: No match found.`)
+
+  }
+
+  return policy
 }

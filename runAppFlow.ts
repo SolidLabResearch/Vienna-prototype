@@ -8,7 +8,7 @@ async function addPolicy() {
 <myPolicy> <a> <Policy>;
     <subject> <food-store>;
     <action> <read>;
-    <resource> <date_of_birth>;
+    <resource> "?webID <https://www.w3.org/2006/vcard/ns#bday> ?bdate .";
     <context> <verification>.`)
 
     await solidLib.logout();

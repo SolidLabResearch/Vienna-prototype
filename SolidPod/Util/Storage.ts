@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmdir, rmdirSync, statSync, unlinkSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmdirSync, statSync, unlinkSync, writeFileSync } from 'fs';
 import { Store, Writer } from 'n3';
 import { fileAsStore } from './Util';
 import path from 'path';
@@ -24,7 +24,7 @@ export abstract class FileStore {
         const filePath = this.getPath(fileName ?? "temp.ttl")
         writeFileSync(filePath, policy)
     }
-    
+
     public delete(fileName: string): void {
         const filePath = this.getPath(fileName ?? "temp.ttl")
         unlinkSync(filePath)
@@ -35,10 +35,10 @@ export abstract class FileStore {
         const fileList = readdirSync(this.path)
         for (const file of fileList) {
             const filePath = this.getPath(file)
-            if (statSync(filePath).isFile()){
+            if (statSync(filePath).isFile()) {
                 store.addQuads((await fileAsStore(filePath)).getQuads(null, null, null, null))
             }
-            
+
         }
         return store
     }
@@ -48,19 +48,19 @@ export abstract class FileStore {
         const fileList = readdirSync(this.path)
         for (const file of fileList) {
             const filePath = this.getPath(file)
-            if (statSync(filePath).isFile()){
-                let fileText: string = readFileSync(filePath, {encoding: "utf-8"})
-                let fileObj : any = JSON.parse(fileText)
+            if (statSync(filePath).isFile()) {
+                let fileText: string = readFileSync(filePath, { encoding: "utf-8" })
+                let fileObj: any = JSON.parse(fileText)
                 jsonResults.push(fileObj)
             }
-            
+
         }
         return jsonResults
     }
 
     // removes everything in the directory
     public clear(): void {
-        rmdirSync(this.path)
+        rmdirSync(this.path, { recursive: true })
         this.init()
     }
     protected getPath(fileName: string): string {
@@ -71,7 +71,7 @@ export abstract class FileStore {
 export class PolicyStore extends FileStore {
     constructor() {
         super(path.join(process.cwd(), 'data', 'policies')) // Don't use this in production
-        console.log("Path where policies are stored:", path.join(process.cwd(), 'data', 'policies'));     
+        console.log("Path where policies are stored:", path.join(process.cwd(), 'data', 'policies'));
     }
 }
 
@@ -79,6 +79,6 @@ export class PolicyStore extends FileStore {
 export class LogStore extends FileStore {
     constructor() {
         super(path.join(process.cwd(), 'data', 'logs')) // Don't use this in production
-        console.log("Path where policies are stored:", path.join(process.cwd(), 'data', 'logs'));     
+        console.log("Path where agreements are stored:", path.join(process.cwd(), 'data', 'logs'));
     }
 }
