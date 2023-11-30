@@ -2,7 +2,7 @@ import { SolidLib } from './SolidLib/Interface/SolidLib';
 import { clearStores, setup } from './setup';
 
 async function getDataFlow() {
-    const solidLib = new SolidLib("food-store");
+    const solidLib = new SolidLib("food-store", 'steve');
     await solidLib.login()
     let dataplusplus = await solidLib.getData("?webID <https://www.w3.org/2006/vcard/ns#bday> ?bdate .", [
         "verification",
