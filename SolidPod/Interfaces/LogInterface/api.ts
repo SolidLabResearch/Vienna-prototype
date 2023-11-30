@@ -2,60 +2,42 @@ import express from 'express'
 import bodyParser from 'body-parser';
 import { PolicyStore } from '../../Util/Storage';
 import { Server} from 'http';
+import { Agreement } from '../../../SolidLib/Interface/ISolidLib';
 const app = express()
-const port = 8060
-app.use(bodyParser.text({ type: 'text/n3' }));
+const port = 8030
+app.use(bodyParser.text({ type: /*'text/n3'*/ "application/json" }));
 
-const LoggedTransactions = []
+const loggedTransactions : {date: Date, agreement: Agreement}[] = []
 
 app.post('/', async (req, res) => {
 
     let body = req.body
-    // check for AuthZ token
-    if (!req.headers.authorization) {
-        console.log(`[${new Date().toISOString()}] - Admin: No AuthZ token.`);
-        res
-            .status(401)
-            .contentType("application/json")
-            .send({ error: "No AuthZ Token" })
-        return
-    }
-
-    if (req.headers.authorization !== "Bearer verySecretToken.Allowed-to-add-policy") { // proper verification needs to happen here (pref communication to authz server)
-        // incorrect token
-        console.log(`[${new Date().toISOString()}] - Admin: Incorrect AuthZ token.`);
-        res
-            .status(401)
-            .contentType("application/json")
-            .send({ error: "Incorrect AuthZ Token" })
-        return
-    }
-
-    if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
-        res.status(400)
-        .contentType("application/json")
-        .send({ error: "No body" })
-        return
-    }
-
-
-    console.log(`[${new Date().toISOString()}] - Admin: Correct AuthZ token.`);
-
-    policyStore.write(req.body, new Date().valueOf() + '.ttl')
-    console.log(`[${new Date().toISOString()}] - Admin: Writing Policy to Policy Store.`);
-
+  
+    console.log(`[${new Date().toISOString()}] - LogInterface: Storing Agreement.`);
+    loggedTransactions.push({ date: new Date(), agreement: JSON.parse(body) as Agreement})
     res
         .status(200)
         .contentType("application/json")
-        .send({ info: "Policy added" })
+        .send({ info: "Log added" })
 })
 
+
+app.get ('/', async (req, res) => {
+  
+    console.log(`[${new Date().toISOString()}] - LogInterface: Getting Agreement.`);
+
+    let log = JSON.stringify(loggedTransactions)
+    res
+        .status(200)
+        .contentType("application/json")
+        .send(log)
+})
 
 export class LogInterface{
     private server: Server | undefined;
     public start(port: number): void{
         this.server = app.listen(port, () => {
-            console.log(`Admin Interface listening on ${port}`)
+            console.log(`Log Interface listening on ${port}`)
             console.log(`URI: http://localhost:${port}/`)
         })
     }

@@ -13,6 +13,7 @@ export class SolidLib {
     private adminInterfaceUrl: string = "http://localhost:8060/"
     private AuthZInterfaceUrl: string = "http://localhost:8050/"
     private dataInterfaceUrl: string = "http://localhost:8040/bob/endpoint" // TODO:: how to get NAME value here?
+    private logInterfaceURL: string = "http://localhost:8030/"
 
     private session: Session | undefined;
 
@@ -318,6 +319,14 @@ export class SolidLib {
             token = await res.json() as any
         }
         return { token, agreements }
+    }
+
+    public async getLogEntries() {
+
+        let res = await fetch(this.logInterfaceURL)
+        let agreementList = await res.json()
+
+        return agreementList
     }
 }
 

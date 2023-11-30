@@ -46,12 +46,12 @@ export async function runInterface(port: number) {
     let publicKeyRaw = await crypto.subtle.exportKey("raw", keypair.publicKey)
     let publicKeyString = Buffer.from(publicKeyRaw).toString('base64')
 
-    // The Dialog endpoint, a get request will trigger an error
+    // The Data endpoint, a get request will trigger an error
     app.get(`/${name}/endpoint`, async (req: any, res: any) => {
 
         res.status(400)
 
-        res.send("Please do a POST request to this endpoint with the dialog message as body")
+        res.send("Please do a POST request to this endpoint with the triple request message as body")
     })
 
     app.post(`/${name}/endpoint`, async (req: any, res: any) => {
@@ -157,7 +157,7 @@ export async function runInterface(port: number) {
 Identity document URI:
 ${webid}
 
-Dialog endpoint URI:
+Data endpoint URI:
 ${endpoint}`
         )
     })

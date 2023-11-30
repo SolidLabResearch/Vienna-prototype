@@ -59,7 +59,7 @@ app.post('/', async (req, res) => {
       }
       break;
     case ResourceType.DATA:
-      authZInterfaceResponse = policyNegotiation(authZRequestMessage, client_id, actor)
+      authZInterfaceResponse = await policyNegotiation(authZRequestMessage, client_id, actor)
       break;
     default:
       break;
@@ -103,7 +103,7 @@ enum ResourceType {
   DATA = "data"
 }
 
-function policyNegotiation(authZRequestMessage: any, client_id: string, actor: string): AuthZInterfaceResponse {
+async function policyNegotiation(authZRequestMessage: any, client_id: string, actor: string): Promise<AuthZInterfaceResponse> {
   let authZInterfaceResponse: AuthZInterfaceResponse = {
     result: false
   }
@@ -139,6 +139,18 @@ function policyNegotiation(authZRequestMessage: any, client_id: string, actor: s
     console.log(`[${new Date().toISOString()}] - Authz: "${client_id}" Requesting ${authZRequestMessage['access-mode']} for ${authZRequestMessage.resource} with agreement.`)
     console.log(`[${new Date().toISOString()}] - Authz: Verifying agreement.`)
     console.log(`[${new Date().toISOString()}] - Authz: Agreement verified: Storing it to [Log Store].`)
+
+    // Store log 
+    // TODO:: get URL instead of hardcoding it
+    await fetch("http://localhost:8030", {
+      method: "POST",
+      headers: {
+          "Content-Type": "application/json"
+      },
+      body: JSON.stringify(authZRequestMessage.agreement)
+    })
+
+
     authZInterfaceResponse = {
       result: true,
       authZToken: {

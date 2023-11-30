@@ -5,20 +5,22 @@ async function getDataFlow() {
     
     const solidLib = new SolidLib("food-store");
     await solidLib.login()
-    let dataplusplus = await solidLib.getData("?webID ?predicate ?bdate .", [
-        "verification",
-        "advertisement"
-    ])
+
     let dataplusplustrusted = await solidLib.getDataWithTrust("?webID ?predicate ?bdate .", [
         "verification",
         "advertisement"
     ])
 
-    console.log('App flow response')
-    console.log(dataplusplus)
-    console.log('The trusted data is')
+    let logEntries = JSON.stringify(await solidLib.getLogEntries(), null, 2)
+
+    console.log('Trusted app flow response')
     console.log(dataplusplustrusted)
+
+    console.log()
+    console.log('Logged Agreements:')
+    console.log(logEntries)
     await solidLib.logout()
+
 }
 
 async function run() {
