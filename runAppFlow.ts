@@ -22,11 +22,16 @@ async function getDataFlow() {
         "advertisement"
     ])
 
-    let logEntries = await solidLib.getLogEntries()
-
     console.log('App flow response')
     console.log(dataplusplus)
 
+    await solidLib.logout()
+}
+
+async function getAgreements(){
+    const solidLib = new SolidLib("admin-App");
+    await solidLib.login()
+    let logEntries = await solidLib.getLogEntries()
     console.log()
     console.log('Logged Agreements:')
     console.log(logEntries)
@@ -43,7 +48,8 @@ async function run() {
     console.log('')
 
     await addPolicy();
-    await getDataFlow()
+    await getDataFlow();
+    await getAgreements();
     await close();
 }
 

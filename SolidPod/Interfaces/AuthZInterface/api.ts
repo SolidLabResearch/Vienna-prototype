@@ -41,7 +41,8 @@ app.post('/', async (req, res) => {
 
   // checking what the target is for the resource | data or policies
   const requestType = checkRequest(authZRequestMessage.resource)
-
+  console.log(`[${new Date().toISOString()}] - Authz: Request type: ${requestType}.`)
+  
   let authZInterfaceResponse: AuthZInterfaceResponse = {
     result: false
   }
@@ -54,6 +55,18 @@ app.post('/', async (req, res) => {
         result: true,
         authZToken: {
           access_token: "verySecretToken.Allowed-to-add-policy",
+          type: 'Bearer' // maybe Dpop, I don't fucking know
+        }
+      }
+      break;
+    case ResourceType.LOG:
+      // give token related to owner is allowed to interact with log
+      console.log(`[${new Date().toISOString()}] - Authz: ${actor} (client: ${client_id}) requesting to add read agreements.`)
+
+      authZInterfaceResponse = {
+        result: true,
+        authZToken: {
+          access_token: "verySecretToken.Allowed-to-read-agreements",
           type: 'Bearer' // maybe Dpop, I don't fucking know
         }
       }
@@ -91,16 +104,24 @@ function parseJwt(token: string) {
 }
 
 function checkRequest(query: string): ResourceType {
-  if (query === "policy") {
-    return ResourceType.POLICY
+
+  switch (query) {
+    case "policy":
+      return ResourceType.POLICY
+      break;
+    case "log":
+      return ResourceType.LOG
+      break;
+    default:
+      return ResourceType.DATA
   }
 
-  return ResourceType.DATA
 }
 
 enum ResourceType {
   POLICY = "policy",
-  DATA = "data"
+  DATA = "data",
+  LOG = "log"
 }
 
 async function policyNegotiation(authZRequestMessage: any, client_id: string, actor: string): Promise<AuthZInterfaceResponse> {
@@ -145,7 +166,7 @@ async function policyNegotiation(authZRequestMessage: any, client_id: string, ac
     await fetch("http://localhost:8030", {
       method: "POST",
       headers: {
-          "Content-Type": "application/json"
+        "Content-Type": "application/json"
       },
       body: JSON.stringify(authZRequestMessage.agreement)
     })
