@@ -49,7 +49,7 @@ const signParams = {
     hash: 'SHA-512'
 }
 
-export async function generateKeyPair() {
+export function generateKeyPair() {
     return subtle.generateKey(keyParams, true, ["sign", "verify"]);
 }
 
@@ -57,10 +57,10 @@ export function importKey(key: string) {
     return subtle.importKey("raw", Buffer.from(key, 'base64'), keyParams, true, ["verify"]);
 }
 
-const sign = async function(privateKey: webcrypto.CryptoKey, buffer: webcrypto.BufferSource) {
+function sign(privateKey: webcrypto.CryptoKey, buffer: webcrypto.BufferSource) {
     return subtle.sign(signParams, privateKey, buffer);
 };
 
-export const verify = async function(publicKey: webcrypto.CryptoKey, signature: ArrayBuffer, data: webcrypto.BufferSource) {
+function verify(publicKey: webcrypto.CryptoKey, signature: ArrayBuffer, data: webcrypto.BufferSource) {
     return subtle.verify(signParams, publicKey, signature, data );
 };

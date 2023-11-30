@@ -322,11 +322,32 @@ export class SolidLib {
     }
 
     public async getLogEntries() {
+        console.log(`SolidLib]:getLogEntries - No access, need AuthZ token.`)
+        const authZRequestMessage: SolidAuthZRequestMessage = {
+            authNToken: {
+                WebID: this.session?.info.webId ?? "",
+                Client: this.session?.info.clientAppId ?? "",
+                Issuer: "" // TODO:
+            },
+            action: Action.Write,
+            query: "log"
+        }
+        const authZToken = await (await this.getAuthZToken(authZRequestMessage)).token
 
-        let res = await fetch(this.logInterfaceURL)
-        let agreementList = await res.json()
+        console.log(`SolidLib]:addPolicy - Now that token is there, fetch agreements.`)
+        const response = await fetch(this.logInterfaceURL, {
+            headers: {
+                authorization: `${authZToken.type} ${authZToken.access_token}`,
+            },
+        })
 
-        return agreementList
+        let agreementList = await response.json()
+
+
+        if (response.status === 200) {
+            return agreementList
+        }
+        throw Error("Some unknown error made it that the agreements")
     }
 }
 
