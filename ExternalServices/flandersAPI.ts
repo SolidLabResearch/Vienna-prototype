@@ -53,22 +53,14 @@ export async function run() {
         if (typeof id !== 'string') {
             return res.status(500).send("id must be a string")
         }
-
         
-        let bdateTriple = n3.DataFactory.quad(
+        let bdateTriple = new n3.Writer({}).quadToString(
             n3.DataFactory.namedNode(id), 
             n3.DataFactory.namedNode("http://xmlns.com/foaf/0.1/name"), 
             n3.DataFactory.literal("Bob The Builder")
         );
 
-        let tripleString : string = await new Promise((resolve, reject) => {
-            const writer = new n3.Writer({}); // Create a writer which uses `c` as a prefix for the namespace `http://example.org/cartoons#`
-            writer.addQuad(bdateTriple)
-            writer.end((error: any, result: any) => { resolve(result) });
-        })
-
-        let content = await signContent(tripleString, govid, keypair.privateKey)
-
+        let content = await signContent(bdateTriple, govid, keypair.privateKey)
         res.status(200).contentType('text/n3').send(content)
     })
 

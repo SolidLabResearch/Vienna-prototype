@@ -1,7 +1,6 @@
 import { Parser, Store, DataFactory } from 'n3';
-import * as crypto from 'crypto';
 import { Quad } from '@rdfjs/types';
-import { verifyDataGraph } from "./createSignedPackage";
+import { importKey, verifyDataGraph } from "./createSignedPackage";
 
 const { namedNode, defaultGraph, quad, literal } = DataFactory;
 
@@ -18,10 +17,7 @@ async function getPubKey(issuer: string) {
     throw new Error("Not a literal");
   }
 
-  return await crypto.subtle.importKey("raw", Buffer.from(objects[0].value, 'base64'), {
-    name: "ECDSA",
-    namedCurve: "P-384",
-  }, true, ['verify']);
+  return importKey(objects[0].value)
 }
 export async function validateSignatures(data: Store) {
   for (const { subject, object, graph } of data.match(null, namedNode('https://example.org/ns/signature#hasContentSignature'), null)) {
