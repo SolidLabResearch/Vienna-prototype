@@ -3,7 +3,8 @@ import { run as runFlandersAPI } from './ExternalServices/flandersAPI'
 import { LogStore, PolicyStore } from './SolidPod/Util/Storage'
 import { startPod } from './SolidPod/index'
 
-export async function setup() {
+
+export function clearStores() {
   console.log('')
   console.log('######################################')
   console.log('Clear log of agreements and policies in pod')
@@ -12,6 +13,8 @@ export async function setup() {
   console.log('')
   new PolicyStore().clear()
   new LogStore().clear()
+}
+export async function setup() {
   console.log('######################################')
   console.log('Setting Up External APIs to fetch data')
   console.log('######################################')

@@ -1,5 +1,5 @@
 import { SolidLib } from './SolidLib/Interface/SolidLib';
-import { setup } from './setup';
+import { clearStores, setup } from './setup';
 
 async function addPolicy() {
     const solidLib = new SolidLib("admin-App");
@@ -39,6 +39,7 @@ async function getAgreements(){
 }
 
 async function run() {
+    clearStores()
     const close = await setup()
 
     console.log('')
