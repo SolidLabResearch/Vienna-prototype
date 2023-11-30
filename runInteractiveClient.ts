@@ -76,11 +76,10 @@ program
 Date: 
 ${entry.date}
 Agreement:
-${entry.agreement}
+${JSON.stringify(entry.agreement, null, 2)}
 `
             )
         }
-        console.log(logEntries)
 
         await solidLib.logout();
     })

@@ -323,8 +323,8 @@ export class SolidLib {
 
     public async getLogEntries() {
 
-        let res = await fetch(this.logInterfaceURL)
-        let agreementList = await res.json()
+        let res = await this.session?.fetch(this.logInterfaceURL)
+        let agreementList = await res?.json()
 
         return agreementList
     }

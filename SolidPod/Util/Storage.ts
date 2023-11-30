@@ -43,6 +43,21 @@ export abstract class FileStore {
         return store
     }
 
+    public readAllJSON() {
+        let jsonResults: any[] = []
+        const fileList = readdirSync(this.path)
+        for (const file of fileList) {
+            const filePath = this.getPath(file)
+            if (statSync(filePath).isFile()){
+                let fileText: string = readFileSync(filePath, {encoding: "utf-8"})
+                let fileObj : any = JSON.parse(fileText)
+                jsonResults.push(fileObj)
+            }
+            
+        }
+        return jsonResults
+    }
+
     // removes everything in the directory
     public clear(): void {
         rmdirSync(this.path)
@@ -57,5 +72,13 @@ export class PolicyStore extends FileStore {
     constructor() {
         super(path.join(process.cwd(), 'data', 'policies')) // Don't use this in production
         console.log("Path where policies are stored:", path.join(process.cwd(), 'data', 'policies'));     
+    }
+}
+
+
+export class LogStore extends FileStore {
+    constructor() {
+        super(path.join(process.cwd(), 'data', 'logs')) // Don't use this in production
+        console.log("Path where policies are stored:", path.join(process.cwd(), 'data', 'logs'));     
     }
 }
