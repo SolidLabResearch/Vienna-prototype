@@ -51,3 +51,9 @@ export async function stringToStore(text: string, options: ParseOptions): Promis
     const quadStream = rdfParser.parse(textStream, options);
     return await storeStream(quadStream);
 }
+
+export async function serializeCryptoKey(key: CryptoKey) {
+    let keyRaw = await crypto.subtle.exportKey("raw", key)
+    let keyString = Buffer.from(keyRaw).toString('base64')
+    return keyString
+}

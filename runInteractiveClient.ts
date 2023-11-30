@@ -6,7 +6,7 @@ import { n3reasoner } from "eyereasoner/dist";
 import { DataFactory, Parser, Store } from "n3";
 import { write } from "@jeswr/pretty-turtle/dist";
 
-var solidLib = new SolidLib("interactive-client");
+var solidLib = new SolidLib("interactive-client", 'steve');
 
 program
     .command('addpolicy')
@@ -88,7 +88,7 @@ ${JSON.stringify(entry.agreement, null, 2)}
 
 async function run() {
     
-    const close = await setup()
+    const close = await setup('steve')
 
     await new Promise(resolve => setTimeout(resolve, 1000));
 

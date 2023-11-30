@@ -2,7 +2,7 @@ import { run as runCompanyAPI } from './ExternalServices/companyAPI'
 import { run as runFlandersAPI } from './ExternalServices/flandersAPI'
 import { startPod } from './SolidPod/index'
 
-export async function setup() {
+export async function setup(podId: string) {
   console.log('')
   console.log('######################################')
   console.log('Setting Up External APIs to fetch data')
@@ -15,7 +15,7 @@ export async function setup() {
   console.log('Setting up Pod Interfaces')
   console.log('######################################')
   console.log('')
-  const pod = startPod()
+  const pod = await startPod(podId)
 
   return async () => {
       await new Promise(res => company.close(res));

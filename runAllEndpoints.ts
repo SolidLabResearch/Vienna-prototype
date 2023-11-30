@@ -1,7 +1,7 @@
 import { setup } from './setup';
 
 async function run() {
-  const close = await setup()
+  const close = await setup('steve')
 
   const keypress = async () => {
     process.stdin.setRawMode(true)

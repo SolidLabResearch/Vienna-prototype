@@ -3,7 +3,7 @@ import { setup } from './setup';
 
 async function getDataFlow() {
     
-    const solidLib = new SolidLib("food-store");
+    const solidLib = new SolidLib("food-store", 'steve');
     await solidLib.login()
 
     let dataplusplustrusted = await solidLib.getDataWithTrust("?webID ?predicate ?bdate .", [
@@ -24,7 +24,7 @@ async function getDataFlow() {
 }
 
 async function run() {
-    const close = await setup()
+    const close = await setup('steve')
 
     console.log('')
     console.log('######################################')

@@ -21,7 +21,7 @@ async function getDataFlow() {
 } 
 
 async function run() {
-    const close = await setup()
+    const close = await setup('steve')
 
     console.log('')
     console.log('######################################')

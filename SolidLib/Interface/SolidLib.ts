@@ -12,7 +12,7 @@ export class SolidLib {
     // hardcoded interface Urls
     private adminInterfaceUrl: string = "http://localhost:8060/"
     private AuthZInterfaceUrl: string = "http://localhost:8050/"
-    private dataInterfaceUrl: string = "http://localhost:8040/bob/endpoint" // TODO:: how to get NAME value here?
+    private dataInterfaceUrl: string = `http://localhost:8040/${this.podId}/endpoint` // TODO:: how to get NAME value here?
     private logInterfaceURL: string = "http://localhost:8030/"
 
     private session: Session | undefined;
@@ -35,7 +35,7 @@ export class SolidLib {
     :Jesse rot:trusts <http://localhost:3456/flandersgov/id> .
   `
 
-    constructor(private client: string) {
+    constructor(private client: string, private podId: string) {
 
     }
 

@@ -2,7 +2,7 @@ import { SolidLib } from './SolidLib/Interface/SolidLib';
 import { setup } from './setup';
 
 async function addPolicy() {
-    const solidLib = new SolidLib("admin-App");
+    const solidLib = new SolidLib("admin-App", 'steve');
     await solidLib.login()
     await solidLib.addPolicy(`
 <myPolicy> <a> <Policy>;
@@ -15,7 +15,7 @@ async function addPolicy() {
 }
 
 async function getDataFlow() {
-    const solidLib = new SolidLib("food-store");
+    const solidLib = new SolidLib("food-store", 'steve');
     await solidLib.login()
     let dataplusplus = await solidLib.getData("?webID <https://www.w3.org/2006/vcard/ns#bday> ?bdate .", [
         "verification",
@@ -29,7 +29,7 @@ async function getDataFlow() {
 }
 
 async function getAgreements(){
-    const solidLib = new SolidLib("admin-App");
+    const solidLib = new SolidLib("admin-App", 'steve');
     await solidLib.login()
     let logEntries = await solidLib.getLogEntries()
     console.log()
@@ -39,7 +39,7 @@ async function getAgreements(){
 }
 
 async function run() {
-    const close = await setup()
+    const close = await setup('steve')
 
     console.log('')
     console.log('######################################')

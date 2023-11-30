@@ -19,40 +19,13 @@ let tripleStore = new n3.Store();
 const packagePredicate = "https://example.org/ns/package#packages"
 const contentPredicate = "https://example.org/ns/package#content"
 
-export async function runInterface(port: number, name?: string) {
+export async function runInterface(port: number, podId: string, webId: string, keypair:CryptoKeyPair) {
 
-    name = name || "bob"
+    const endpoint = `http://localhost:${port}/${podId}/endpoint`
 
+    await prefetch(webId);
 
-    const webid = `http://localhost:${port}/${name}/id`
-    const endpoint = `http://localhost:${port}/${name}/endpoint`
-
-    await prefetch(webid);
-
-
-    // Create keypair for the data pod
-
-    let keypair = await crypto.subtle.generateKey(
-        {
-            name: "ECDSA",
-            namedCurve: "P-384",
-        },
-        true,
-        ["sign", "verify"]
-    );
-
-    let publicKeyRaw = await crypto.subtle.exportKey("raw", keypair.publicKey)
-    let publicKeyString = Buffer.from(publicKeyRaw).toString('base64')
-
-    // The Data endpoint, a get request will trigger an error
-    app.get(`/${name}/endpoint`, async (req: any, res: any) => {
-
-        res.status(400)
-
-        res.send("Please do a POST request to this endpoint with the triple request message as body")
-    })
-
-    app.post(`/${name}/endpoint`, async (req: any, res: any) => {
+    app.post(`/${podId}/endpoint`, async (req: any, res: any) => {
 
         // Check AuthZToken
 
@@ -123,29 +96,19 @@ export async function runInterface(port: number, name?: string) {
 
         // Package the government data in the correct provenance
         let provenanceWrappedPackage = await pack.packageContent(packageString, {
-            packagedBy: webid,
+            packagedBy: webId,
             packagedFrom: endpoint,
             purpose: "https://gdpr.org/purposes/Research",
         })
 
         // Sign the package as the Pod
-        let signedPackage = await signContent(provenanceWrappedPackage, webid, keypair.privateKey)
+        let signedPackage = await signContent(provenanceWrappedPackage, webId, keypair.privateKey)
         
         // Send the response
         res.status(200).contentType('text/n3').send(signedPackage)
     })
 
-    app.get(`/${name}/id`, async (req: any, res: any) => {
-
-        let webId = 
-`@prefix foaf: <http://xmlns.com/foaf/0.1/>.
-
-<${webid}> a foaf:Person;
-    foaf:name "${name}"@en;
-    <http://www.w3.org/ns/auth/cert#key>  "${publicKeyString}".
-`
-        res.status(200).contentType('text/turtle').send(webId)
-    })
+ 
 
 
     return app.listen(port, () => {
@@ -153,7 +116,7 @@ export async function runInterface(port: number, name?: string) {
 `Running Pod API system
 
 Identity document URI:
-${webid}
+${webId}
 
 Data endpoint URI:
 ${endpoint}`
