@@ -333,7 +333,7 @@ export class SolidLib {
         return { token, agreements }
     }
 
-    public async getLogEntries() {
+    public async getLogEntries():Promise<[]> {
 
         let res = await this.session?.fetch(this.logInterfaceURL)
         let agreementList = await res?.json()

@@ -2,8 +2,6 @@ import { SolidLib } from './SolidLib/Interface/SolidLib';
 import { clearStores, setup } from './setup';
 
 const podId = "steve"
-const foodSolidLib = new SolidLib("food-store", podId);
-const adminSolidLib = new SolidLib("admin-App", podId);
 
 const resourceString = "?webID <https://www.w3.org/2006/vcard/ns#bday> ?bdate ."
 const policy = `
@@ -15,21 +13,39 @@ const policy = `
 const purposes = ["verification", "advertisment"]
 enum FlowRunnerResult {
     Success = "succes",
-    Fail ="failure"
+    Fail = "failure"
 }
 
 type FlowRunnerOutput = {
     result: FlowRunnerResult,
+    expectedResult: FlowRunnerResult
     type: string
     error?: string
 }
 abstract class FlowRunner {
     private flowInfo: string;
-    constructor(info: string) {
+    protected expectedResult: FlowRunnerResult
+    protected foodSolidLib = new SolidLib("food-store", podId);
+    protected adminSolidLib = new SolidLib("admin-App", podId);
+
+    constructor(info: string, expectedResult: FlowRunnerResult) {
         this.flowInfo = info
+        this.expectedResult = expectedResult
+
+    }
+
+    protected async login() {
+        await this.adminSolidLib.login()
+        await this.foodSolidLib.login()
+    }
+
+    protected async logout() {
+        await this.adminSolidLib.logout()
+        await this.foodSolidLib.logout()
     }
     public async run(): Promise<FlowRunnerOutput> {
         let result: FlowRunnerOutput = {
+            expectedResult: this.expectedResult,
             result: FlowRunnerResult.Fail,
             type: this.flowInfo
         }
@@ -38,7 +54,7 @@ abstract class FlowRunner {
             await this.runFlow()
             result.result = FlowRunnerResult.Success
         } catch (e) {
-            result.error = e as any
+            result.error = (e as any).message
 
         }
         return result
@@ -47,20 +63,37 @@ abstract class FlowRunner {
 }
 
 class HappyFlow extends FlowRunner {
-    constructor(){
-        super('Happy Flow')
+    constructor() {
+        super('Happy Flow', FlowRunnerResult.Success)
     }
-    async runFlow(): Promise<void> {
-        await adminSolidLib.login()
-        await foodSolidLib.login()
-        await adminSolidLib.addPolicy(policy)
-        await foodSolidLib.getData(resourceString, purposes)
-        const agreements:[] = await adminSolidLib.getLogEntries()
+
+    protected async runFlow(): Promise<void> {
+        await this.login()
+
+        await this.adminSolidLib.addPolicy(policy)
+        await this.foodSolidLib.getData(resourceString, purposes)
+        const agreements: [] = await this.adminSolidLib.getLogEntries()
+        
+        if (agreements.length === 0){
+            throw Error('expected agreement')
+        }
+
+        await this.logout()
+    }
+}
+
+class NotLoggedIn extends FlowRunner {
+    constructor() {
+        super('Not logged in (IDP)', FlowRunnerResult.Fail)
+    }
+
+    protected async runFlow(): Promise<void> {
+        await this.adminSolidLib.addPolicy(policy)
+        await this.foodSolidLib.getData(resourceString, purposes)
+        const agreements: [] = await this.adminSolidLib.getLogEntries()
         // if (agreements.length !== 1){
         //     throw Error('expected agreement')
         // }
-        await adminSolidLib.logout()
-        await foodSolidLib.logout()
     }
 }
 async function main() {
@@ -72,8 +105,24 @@ async function main() {
     console.log('######################################')
     console.log('')
     console.log('')
-    console.log(await new HappyFlow().run())
+    const flows: FlowRunner[] = [
+        new HappyFlow(),
+        new NotLoggedIn()
+    ]
+
+    const results: FlowRunnerOutput[] = []
+
+    for (const flow of flows) {
+        results.push(await flow.run())
+    }
     await close();
     clearStores()
+    console.log('');
+    console.log(`Number of flows implemented: ${results.length}.`);
+    console.log(`Number of flows working correctly: ${results.filter(output => output.expectedResult === output.result).length}.`);
+    results.forEach(output => console.log(`${output.type} - status: ${output.expectedResult === output.result ? 'succesful': `failure: Error ${output.error}`}`));
+
+    process.exit()
+
 }
 main()
