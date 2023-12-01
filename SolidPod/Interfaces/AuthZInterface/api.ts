@@ -57,26 +57,29 @@ app.post('/', async (req, res) => {
       console.log(`[${new Date().toISOString()}] - Authz: ${actor} (client: ${client_id}) requesting to add policy.`)
       if (client_id !== "admin-App") {
         console.log(`[${new Date().toISOString()}] - Authz: SHOULD NOT BE ALLOWED TO GET A TOKEN DUE TO WRONG APP.`)
-      }
-      authZInterfaceResponse = {
-        result: AuthZInterfaceResponseResult.Token,
-        authZToken: {
-          access_token: "verySecretToken.Allowed-to-add-policy",
-          type: 'Bearer' // maybe Dpop, I don't fucking know
+      } else {
+        authZInterfaceResponse = {
+          result: AuthZInterfaceResponseResult.Token,
+          authZToken: {
+            access_token: "verySecretToken.Allowed-to-add-policy",
+            type: 'Bearer' // maybe Dpop, I don't fucking know
+          }
         }
       }
+      
       break;
     case ResourceType.LOG:
       // give token related to owner is allowed to interact with log
       console.log(`[${new Date().toISOString()}] - Authz: ${actor} (client: ${client_id}) requesting to add read agreements.`)
       if (client_id !== "admin-App") {
         console.log(`[${new Date().toISOString()}] - Authz: SHOULD NOT BE ALLOWED TO GET A TOKEN DUE TO WRONG APP.`)
-      }
-      authZInterfaceResponse = {
-        result: AuthZInterfaceResponseResult.Token,
-        authZToken: {
-          access_token: "verySecretToken.Allowed-to-read-agreements",
-          type: 'Bearer' // maybe Dpop, I don't fucking know
+      } else {
+        authZInterfaceResponse = {
+          result: AuthZInterfaceResponseResult.Token,
+          authZToken: {
+            access_token: "verySecretToken.Allowed-to-read-agreements",
+            type: 'Bearer' // maybe Dpop, I don't fucking know
+          }
         }
       }
       break;
