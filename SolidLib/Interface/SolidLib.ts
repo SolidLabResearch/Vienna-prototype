@@ -213,6 +213,7 @@ export class SolidLib {
         }
     }
 
+    // Admin only
     public async addPolicy(policy: string): Promise<boolean> {
         if (!this.session) {
             throw Error("No session")
@@ -333,6 +334,7 @@ export class SolidLib {
         return { token, agreements }
     }
 
+    // Admin only
     public async getLogEntries(): Promise<[]> {
         const authZRequestMessage: SolidAuthZRequestMessage = {
             authNToken: {

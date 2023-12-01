@@ -176,7 +176,7 @@ async function policyNegotiation(authZRequestMessage: any, client_id: string, ac
       }
     }
     console.log(`[${new Date().toISOString()}] - Authz: "${client_id}" needs to sign this "pod signed Instantiated Policy".`)
-  } else {
+  } else { // There is an Agreement
     console.log(`[${new Date().toISOString()}] - Authz: "${client_id}" Requesting ${authZRequestMessage['access-mode']} for ${authZRequestMessage.resource} with agreement.`)
     console.log(`[${new Date().toISOString()}] - Authz: Verifying agreement.`)
     // validate agreement (right now just check validity of signatures)

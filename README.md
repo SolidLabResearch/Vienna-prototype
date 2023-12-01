@@ -86,3 +86,10 @@ This could all be starting points of proper research
 * Signed data is stored as trusted packages of single triples
   * This is a limitation of the query approach we use, which requires a single triple request to be made.
   * On matching, this will retrieve the full package containing said triple, which will give problems if multiple triples are present in that package.
+
+## End-To-End
+
+* Webpage showing multiple products
+* Webpage allows Login with Solid
+* Webpage gets your WebID
+* Webpage 

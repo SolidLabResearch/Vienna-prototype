@@ -1,6 +1,19 @@
 import { SolidLib } from './SolidLib/Interface/SolidLib';
 import { clearStores, setup } from './setup';
 
+async function addPolicy() {
+    const solidLib = new SolidLib("admin-App", 'steve');
+    await solidLib.login()
+    await solidLib.addPolicy(`
+<myPolicy> <a> <Policy>;
+    <subject> <food-store>;
+    <action> <read>;
+    <resource> "?webID ?predicate ?bdate .";
+    <context> <verification>.`)
+
+    await solidLib.logout();
+}
+
 async function getDataFlow() {
     
     const solidLib = new SolidLib("food-store", 'steve');
@@ -26,6 +39,7 @@ async function getDataFlow() {
 async function run() {
     clearStores()
     const close = await setup('steve')
+    await addPolicy()
 
     console.log('')
     console.log('######################################')

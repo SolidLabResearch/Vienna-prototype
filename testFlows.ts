@@ -3,6 +3,8 @@ import { clearStores, setup } from './setup';
 
 const podId = "steve"
 
+// TODO:: add some colours to the successful / failed logging so we can immediately see failed tests
+
 const resourceString = "?webID <https://www.w3.org/2006/vcard/ns#bday> ?bdate ."
 const policy = `
 <myPolicy> <a> <Policy>;
