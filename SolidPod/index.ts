@@ -44,7 +44,9 @@ export async function startPod(podId: string) {
         podId, keyPair, webId: ""
     }
 
-    const identityInterface = new IdentityInterface(serviceInfo)
+    let dataEndpoint = `http://localhost:${dataInterfacePort}/${podId}/endpoint`;
+
+    const identityInterface = new IdentityInterface(serviceInfo, dataEndpoint)
     await identityInterface.start(identityInterfacePort)
     let webId = identityInterface.getWebId()
     if (!webId) throw new Error('WebID could not be created.')
