@@ -346,8 +346,9 @@ export class SolidLib {
         const authZToken = await (await this.getAuthZToken(authZRequestMessage)).token
         console.log(`SolidLib]:addPolicy - Now that token is there, add Policy`, authZToken)
 
+        console.log(authZToken);
         
-        let response = await fetch(this.adminInterfaceUrl, {
+        let response = await fetch(this.logInterfaceURL, {
             method: "GET",
             headers: {
                 authorization: `${authZToken.type} ${authZToken.access_token}`,

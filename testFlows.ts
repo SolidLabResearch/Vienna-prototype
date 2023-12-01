@@ -216,7 +216,7 @@ async function main() {
         new HappyFlow(),
         new NotLoggedInAll(),
         new AddPolicyFlow(),
-        // new GetDataWithTrust(),
+        new GetDataWithTrust(),
         new GetDataWithoutPolicy(),
         new NotLoggedInFoodStore(),
         new NotLoggedInGetAgreements(),
