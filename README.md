@@ -75,3 +75,10 @@ ts-node runAddPolicyFlow.ts
 - [ ] Create a list of assumptions at points in the code (e.g. policy matching is string matching because of ...).
 This could all be starting points of proper research
 - [ ] verify agreement
+
+
+## Assumptions made
+
+* Signed data is stored as single triples
+  * This is a limitation of the query approach we use, which requires a single triple request to be made.
+  * On matching, this will retrieve the full package containing said triple, 

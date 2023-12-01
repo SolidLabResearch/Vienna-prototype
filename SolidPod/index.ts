@@ -84,6 +84,7 @@ async function prefetch(webId: string) {
     quads = quads.concat(await n3toQuadArray( await (await fetch(`http://localhost:3456/flandersgov/endpoint/name?id=${webId}`)).text() ) )
     quads = quads.concat(await n3toQuadArray( await (await fetch(`http://localhost:3456/flandersgov/endpoint/address?id=${webId}`)).text() ) )
     quads = quads.concat(await n3toQuadArray( await (await fetch(`http://localhost:3457/company/endpoint/licensekey?id=${webId}`)).text() ) )
+    quads = quads.concat(await n3toQuadArray( await (await fetch(`http://localhost:3457/company/endpoint/dob?id=${webId}`)).text() ) )
 
     return quads
 } 

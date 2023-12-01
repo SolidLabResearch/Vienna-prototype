@@ -44,6 +44,30 @@ export async function run() {
         res.status(200).contentType('text/n3').send(content)
     })
 
+    app.get('/company/endpoint/dob', async (req, res) => {
+        let id = req.query.id
+        
+        if (typeof id !== 'string') {
+            return res.status(500).send("id must be a string")
+        }
+
+        let bdateTriple = n3.DataFactory.quad(
+            n3.DataFactory.namedNode(id), 
+            n3.DataFactory.namedNode("https://www.w3.org/2006/vcard/ns#bday"), 
+            n3.DataFactory.literal(new Date('1999-01-01T10:00:00').toISOString(), n3.DataFactory.namedNode("http://www.w3.org/2001/XMLSchema#dateTime"))
+        );
+
+        let tripleString : string = await new Promise((resolve, reject) => {
+            const writer = new n3.Writer({}); // Create a writer which uses `c` as a prefix for the namespace `http://example.org/cartoons#`
+            writer.addQuad(bdateTriple)
+            writer.end((error: any, result: any) => { resolve(result) });
+        })
+
+        let content = await signContent(tripleString, compid, keypair.privateKey)
+
+        res.status(200).contentType('text/n3').send(content)
+    })
+
     app.get('/company/id', async (req, res) => {
 
         let webId = 
@@ -64,6 +88,9 @@ export async function run() {
 
 identity document URI:
 ${compid}
+
+birthdate endpoint URI:
+http://localhost:${port}/company/endpoint/dob?id=<webid>
 
 licensekey endpoint URI:
 http://localhost:${port}/company/endpoint/licensekey?id=<webid>`
