@@ -55,7 +55,7 @@ export class IdentityInterface extends PublicInterface {
 
 <${this.webId}> a foaf:Person;
     foaf:name "${this.info.podId}"@en;
-    pim:storage ${storageURL};
+    pim:storage <${storageURL}>;
     <http://www.w3.org/ns/auth/cert#key>  "${keyString}".
 `
             res.status(200).contentType('text/turtle').send(webIdString)
