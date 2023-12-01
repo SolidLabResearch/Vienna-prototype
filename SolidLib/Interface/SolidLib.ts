@@ -86,10 +86,10 @@ export class SolidLib {
             const tokenCall = await this.getAuthZToken(authZRequestMessage)
             authZToken = tokenCall.token
             resultingAgreements = tokenCall.agreements
-        } catch (e){
+        } catch (e) {
             console.log(`[SolidLib]:getData - No token obtained.`)
             throw e
-            
+
         }
 
         console.log(`[SolidLib]:getData - Now that token is there, fetch data`, authZToken)
@@ -103,7 +103,7 @@ export class SolidLib {
             method: "POST",
             headers: {
                 "content-type": "text/n3",
-                "authorization":  `${authZToken.type} ${authZToken.access_token}`,
+                "authorization": `${authZToken.type} ${authZToken.access_token}`,
             },
             body: query
         })
@@ -260,7 +260,7 @@ export class SolidLib {
 
     // note: Wout comment: I think it will only be one agreement per authztoken.
     private async getAuthZToken(authZRequestMessage: SolidAuthZRequestMessage): Promise<{ token: AuthZToken, agreements: Agreement[] }> {
-        const agreements: Agreement[] = [] 
+        const agreements: Agreement[] = []
         if (!this.session) {
             throw Error("No session")
         }
@@ -333,10 +333,27 @@ export class SolidLib {
         return { token, agreements }
     }
 
-    public async getLogEntries():Promise<[]> {
+    public async getLogEntries(): Promise<[]> {
+        const authZRequestMessage: SolidAuthZRequestMessage = {
+            authNToken: {
+                WebID: this.session?.info.webId ?? "",
+                Client: this.session?.info.clientAppId ?? "",
+                Issuer: "" // TODO:
+            },
+            action: Action.Read,
+            query: "log"
+        }
+        const authZToken = await (await this.getAuthZToken(authZRequestMessage)).token
+        console.log(`SolidLib]:addPolicy - Now that token is there, add Policy`, authZToken)
 
-        let res = await this.session?.fetch(this.logInterfaceURL)
-        let agreementList = await res?.json()
+        
+        let response = await fetch(this.adminInterfaceUrl, {
+            method: "GET",
+            headers: {
+                authorization: `${authZToken.type} ${authZToken.access_token}`,
+            },
+        })
+        let agreementList = await response?.json()
 
         return agreementList
     }

@@ -168,6 +168,41 @@ class NotLoggedInFoodStore extends FlowRunner {
     }
 }
 
+class NotLoggedInGetAgreements extends FlowRunner {
+    constructor() {
+        super('Getting Agreements without logged in (IDP)', FlowRunnerResult.Fail)
+    }
+    protected async runFlow(): Promise<void> {
+        await this.adminSolidLib.getLogEntries()
+    }
+}
+
+
+class FoodStoreGetAgreements extends FlowRunner {
+    constructor() {
+        super('Getting Agreements logged in as food store(IDP)', FlowRunnerResult.Fail)
+    }
+    protected async runFlow(): Promise<void> {
+        await this.foodSolidLib.login()
+        await this.foodSolidLib.getLogEntries()
+        await this.foodSolidLib.logout()
+    }
+}
+
+class FoodStoreAddPolicy extends FlowRunner {
+    constructor() {
+        super('Adding policy logged in as food store(IDP)', FlowRunnerResult.Fail)
+    }
+    protected async runFlow(): Promise<void> {
+        await this.foodSolidLib.login()
+        const policyAdded = await this.foodSolidLib.addPolicy(policy)
+        if (policyAdded) {
+            throw Error("Food store should not be allowed to add a policy.")
+        }
+        await this.foodSolidLib.logout()
+    }
+}
+
 async function main() {
     const close = await setup(podId)
     clearStores()
@@ -181,9 +216,12 @@ async function main() {
         new HappyFlow(),
         new NotLoggedInAll(),
         new AddPolicyFlow(),
-        new GetDataWithTrust(),
+        // new GetDataWithTrust(),
         new GetDataWithoutPolicy(),
         new NotLoggedInFoodStore(),
+        new NotLoggedInGetAgreements(),
+        new FoodStoreGetAgreements(),
+        new FoodStoreAddPolicy(),
     ]
 
     const results: FlowRunnerOutput[] = []

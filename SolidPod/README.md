@@ -43,3 +43,9 @@ SolidLib shop gets data flow
 npx ts-node app.ts 
 ```
 
+## Test whether all flows still work
+
+```sh
+npx ts-node testFlow.ts
+
+```
