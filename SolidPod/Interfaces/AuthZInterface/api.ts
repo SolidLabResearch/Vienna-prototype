@@ -1,4 +1,4 @@
-import { AuthZInterfaceResponse, AuthZInterfaceResponseResult, Policy } from '../../../SolidLib/Interface/ISolidLib'
+import { Agreement, AuthZInterfaceResponse, AuthZInterfaceResponseResult, Policy } from '../../../SolidLib/Interface/ISolidLib'
 import { Server } from 'http';
 import express, { query } from 'express'
 import { PolicyStore } from '../../Util/Storage';
@@ -139,7 +139,7 @@ enum ResourceType {
   DATA = "data",
   LOG = "log"
 }
-
+// TODO: form proper authZRequestMessage (see interfaces)
 async function policyNegotiation(authZRequestMessage: any, client_id: string, actor: string): Promise<AuthZInterfaceResponse> {
   let authZInterfaceResponse: AuthZInterfaceResponse = {
     result: AuthZInterfaceResponseResult.Error
@@ -174,45 +174,57 @@ async function policyNegotiation(authZRequestMessage: any, client_id: string, ac
     }
     console.log(`[${new Date().toISOString()}] - Authz: "${client_id}" needs to sign this "pod signed Instantiated Policy".`)
   } else {
-    // TODO: validate agreement (right now just check validity of signatures)
-    // Needs to be done properly 
     console.log(`[${new Date().toISOString()}] - Authz: "${client_id}" Requesting ${authZRequestMessage['access-mode']} for ${authZRequestMessage.resource} with agreement.`)
     console.log(`[${new Date().toISOString()}] - Authz: Verifying agreement.`)
-    console.log(`[${new Date().toISOString()}] - Authz: Agreement verified: Storing it to [Log Store].`)
+    // validate agreement (right now just check validity of signatures)
+    // Needs to be done properly 
+    const valid = verifyAgreement(authZRequestMessage.agreement, { client_id, webId: actor })
+    switch (valid) {
+      case true:
+        authZInterfaceResponse = {
+          result: AuthZInterfaceResponseResult.Token,
+          authZToken: {
+            access_token: "verySecretToken.Allowed-to-read-dob.",
+            type: 'Bearer' // maybe Dpop, I don't fucking know
+          }
+        }
+        console.log(`[${new Date().toISOString()}] - Authz: Agreement verified: Storing it to [Log Store].`)
+        // Store log 
+        // TODO:: get URL instead of hardcoding it
+        await fetch("http://localhost:8030", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(authZRequestMessage.agreement)
+        })
+        break;
+      case false:
+        console.log(`[${new Date().toISOString()}] - Authz: Agreement could not be verified.`)
+        authZInterfaceResponse = {
+          result: AuthZInterfaceResponseResult.Error,
+          error: "Agreement could not be verified"
+        }
+        break;
 
-    // Store log 
-    // TODO:: get URL instead of hardcoding it
-    await fetch("http://localhost:8030", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(authZRequestMessage.agreement)
-    })
-
-
-    authZInterfaceResponse = {
-      result: AuthZInterfaceResponseResult.Token,
-      authZToken: {
-        access_token: "verySecretToken.Allowed-to-read-dob.",
-        type: 'Bearer' // maybe Dpop, I don't fucking know
-      }
     }
+
+
   }
   return authZInterfaceResponse
 
 }
 
 
-export class AuthZInterface extends PublicInterface{
-  public async start(port: number){
+export class AuthZInterface extends PublicInterface {
+  public async start(port: number) {
     this.server = app.listen(port, () => {
       console.log(`Authorization Interface listening on ${port}`)
       console.log(`URI: http://localhost:${port}/`)
     })
   }
-  
-  public async stop(){
+
+  public async stop() {
     await new Promise<any>(res => this.server?.close(res));
   }
 }
@@ -222,7 +234,6 @@ async function matchPolicy(args: {
   action: string,
   resource: string,
   purpose: string[]
-
 }): Promise<Policy | undefined> {
   // getPolicy (should loop over all policies)
   let policy: Policy | undefined
@@ -260,4 +271,19 @@ async function matchPolicy(args: {
   }
 
   return policy
+}
+
+function verifyAgreement(agreement: Agreement, authNToken: { client_id: string; webId: string }): boolean {
+  // verify own signature over policy: verify if it is our own signed instantiated policy
+  console.log(agreement);
+  
+  if (agreement.owner === authNToken.webId && agreement.ownerSignature.issuer !== "Pod"){
+    return false
+  }
+  // verify signature of consumer: is the consumer correct in the agreement
+  if (agreement.consumer !== authNToken.client_id) {
+    return false
+  }
+
+  return true
 }

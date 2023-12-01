@@ -74,4 +74,4 @@ ts-node runAddPolicyFlow.ts
 - [ ] Create a lot of different flows (with deliberate ones throwing errors)
 - [ ] Create a list of assumptions at points in the code (e.g. policy matching is string matching because of ...).
 This could all be starting points of proper research
-- [ ] verify agreement
+- [x] verify agreement
