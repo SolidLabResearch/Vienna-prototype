@@ -44,7 +44,9 @@ export async function startPod(podId: string) {
         podId, keyPair, webId: ""
     }
 
-    const identityInterface = new IdentityInterface(serviceInfo)
+    let dataEndpoint = `http://localhost:${dataInterfacePort}/${podId}/endpoint`;
+
+    const identityInterface = new IdentityInterface(serviceInfo, dataEndpoint)
     await identityInterface.start(identityInterfacePort)
     let webId = identityInterface.getWebId()
     if (!webId) throw new Error('WebID could not be created.')
@@ -84,6 +86,7 @@ async function prefetch(webId: string) {
     quads = quads.concat(await n3toQuadArray( await (await fetch(`http://localhost:3456/flandersgov/endpoint/name?id=${webId}`)).text() ) )
     quads = quads.concat(await n3toQuadArray( await (await fetch(`http://localhost:3456/flandersgov/endpoint/address?id=${webId}`)).text() ) )
     quads = quads.concat(await n3toQuadArray( await (await fetch(`http://localhost:3457/company/endpoint/licensekey?id=${webId}`)).text() ) )
+    quads = quads.concat(await n3toQuadArray( await (await fetch(`http://localhost:3457/company/endpoint/dob?id=${webId}`)).text() ) )
 
     return quads
 } 

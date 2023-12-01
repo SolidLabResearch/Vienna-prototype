@@ -74,4 +74,15 @@ ts-node runAddPolicyFlow.ts
 - [ ] Create a lot of different flows (with deliberate ones throwing errors)
 - [ ] Create a list of assumptions at points in the code (e.g. policy matching is string matching because of ...).
 This could all be starting points of proper research
-- [x] verify agreement
+- [X] verify agreement
+
+
+## Assumptions made
+
+* Policy subject is not verified, it currently matches on a passed string value
+  * Time constraints, and we have a working IDP eventually when porting to CSS
+* Policy matching on the query string is done with string matching
+  * We are unsure how exactly we should tackle this, so we use a for-now approach
+* Signed data is stored as trusted packages of single triples
+  * This is a limitation of the query approach we use, which requires a single triple request to be made.
+  * On matching, this will retrieve the full package containing said triple, which will give problems if multiple triples are present in that package.

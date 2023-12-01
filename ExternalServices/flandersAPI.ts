@@ -21,11 +21,9 @@ export async function run() {
     app.get('/flandersgov/endpoint/dob', async (req, res) => {
         let id = req.query.id
         
-        
         if (typeof id !== 'string') {
             return res.status(500).send("id must be a string")
         }
-
         
         let bdateTriple = n3.DataFactory.quad(
             n3.DataFactory.namedNode(id), 
@@ -38,9 +36,6 @@ export async function run() {
             writer.addQuad(bdateTriple)
             writer.end((error: any, result: any) => { resolve(result) });
         })
-
-        
-        console.log('triple', tripleString)
 
         let content = await signContent(tripleString, govid, keypair.privateKey)
 
