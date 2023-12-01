@@ -22,7 +22,7 @@ export async function signContent(content: string, issuer: string, privateKey: w
 
 export function n3toQuadArray(message: string) {
     let quadArray = new n3.Parser({format: "text/n3"}).parse(message)
-    // TODO:: figure out fix why there are nulls in the parsed quads
+    // Fixes bug in N3 parser for empty graph
     quadArray = quadArray.filter(q => q.subject && q.predicate && q.object)
     return quadArray
 }
