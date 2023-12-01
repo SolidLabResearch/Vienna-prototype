@@ -1,7 +1,6 @@
 import { DataFactory, Quad, Store, Term } from "n3";
 import { Component } from "../Component";
 import { write } from '@jeswr/pretty-turtle';
-import { n3toQuadArray } from "../../Util/packaging/createSignedPackage";
 import { ServiceInfo } from "../..";
 
 const packagePredicate = "https://example.org/ns/package#packages"
@@ -17,21 +16,14 @@ export class DataStorageComponent extends Component {
         this.store = new Store();
     }
 
-    async start() {
-
-        await this.prefetch(this.info.webId);
-    }
+    async start() {}
 
     async close() {}
 
         
-    async prefetch(webId: string) {
-        // TODO:: authenticated requests??
-        this.store.addQuads( await n3toQuadArray( await (await fetch(`http://localhost:3456/flandersgov/endpoint/dob?id=${webId}`)).text() ) )
-        this.store.addQuads( await n3toQuadArray( await (await fetch(`http://localhost:3456/flandersgov/endpoint/name?id=${webId}`)).text() ) )
-        this.store.addQuads( await n3toQuadArray( await (await fetch(`http://localhost:3456/flandersgov/endpoint/address?id=${webId}`)).text() ) )
-        this.store.addQuads( await n3toQuadArray( await (await fetch(`http://localhost:3457/company/endpoint/licensekey?id=${webId}`)).text() ) )
-    } 
+    async backdoorAddData(quads: Quad[]) {
+        await this.store.addQuads(quads);
+    }
 
     /**
     * 
@@ -97,7 +89,6 @@ export class DataStorageComponent extends Component {
         return dataGraph
         
     }
-
 
     private async serializeN3Quads(quads: Quad[]) {
 

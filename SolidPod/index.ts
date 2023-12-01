@@ -4,9 +4,10 @@ import { LogInterface } from './Interfaces/LogInterface/api'
 import { DataInterface } from './Interfaces/DataInterface/api'
 import { IdentityInterface } from './Interfaces/IdentityInterface/api'
 
-import { generateKeyPair } from './Util/packaging/createSignedPackage'
+import { generateKeyPair, n3toQuadArray } from './Util/packaging/createSignedPackage'
 import { ServerConfigurator } from '@solid/community-server'
 import { DataStorageComponent } from './Components/DataStorage/DataStorageComponent'
+import { Quad } from 'n3'
 
 
 const adminInterfacePort = 8060
@@ -54,6 +55,8 @@ export async function startPod(podId: string) {
     // Components
     const dataStorageComponent = new DataStorageComponent(serviceInfo);
 
+    await dataStorageComponent.backdoorAddData(await prefetch(webId))
+
     // Interfaces
     const adminInterface = new AdminInterface(serviceInfo)
     const authZInterface = new AuthZInterface(serviceInfo)
@@ -72,3 +75,15 @@ export async function startPod(podId: string) {
         dataInterface,
     ]
 }
+
+
+async function prefetch(webId: string) {
+    let quads: Quad[] = [];
+    // TODO:: authenticated requests??
+    quads = quads.concat(await n3toQuadArray( await (await fetch(`http://localhost:3456/flandersgov/endpoint/dob?id=${webId}`)).text() ) )
+    quads = quads.concat(await n3toQuadArray( await (await fetch(`http://localhost:3456/flandersgov/endpoint/name?id=${webId}`)).text() ) )
+    quads = quads.concat(await n3toQuadArray( await (await fetch(`http://localhost:3456/flandersgov/endpoint/address?id=${webId}`)).text() ) )
+    quads = quads.concat(await n3toQuadArray( await (await fetch(`http://localhost:3457/company/endpoint/licensekey?id=${webId}`)).text() ) )
+
+    return quads
+} 
