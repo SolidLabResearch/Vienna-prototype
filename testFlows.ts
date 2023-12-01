@@ -73,8 +73,8 @@ class HappyFlow extends FlowRunner {
         await this.adminSolidLib.addPolicy(policy)
         await this.foodSolidLib.getData(resourceString, purposes)
         const agreements: [] = await this.adminSolidLib.getLogEntries()
-        
-        if (agreements.length === 0){
+
+        if (agreements.length === 0) {
             throw Error('expected agreement')
         }
 
@@ -82,20 +82,92 @@ class HappyFlow extends FlowRunner {
     }
 }
 
-class NotLoggedIn extends FlowRunner {
+class NotLoggedInAll extends FlowRunner {
     constructor() {
-        super('Not logged in (IDP)', FlowRunnerResult.Fail)
+        super('Not logged in flow (IDP)', FlowRunnerResult.Fail)
     }
 
     protected async runFlow(): Promise<void> {
         await this.adminSolidLib.addPolicy(policy)
         await this.foodSolidLib.getData(resourceString, purposes)
         const agreements: [] = await this.adminSolidLib.getLogEntries()
-        // if (agreements.length !== 1){
-        //     throw Error('expected agreement')
-        // }
+        if (agreements.length === 0) {
+            throw Error('expected agreement')
+        }
     }
 }
+
+class AddPolicyFlow extends FlowRunner {
+    constructor() {
+        super('Add Policy Flow', FlowRunnerResult.Success)
+
+
+    }
+    protected async runFlow(): Promise<void> {
+        await this.login()
+        const status = await this.adminSolidLib.addPolicy(policy)
+        if (!status) {
+            throw Error("Adding policy did not work")
+        }
+        await this.logout()
+    }
+}
+class GetDataWithTrust extends FlowRunner {
+    constructor() {
+        super('Get Data With Trust Flow', FlowRunnerResult.Success)
+    }
+    protected async runFlow(): Promise<void> {
+        await this.login()
+
+        await this.adminSolidLib.addPolicy(policy)
+        await this.foodSolidLib.getDataWithTrust(resourceString, purposes)
+
+        // TODO: do some checking whether data is trusted
+        // const agreements: [] = await this.adminSolidLib.getLogEntries()
+
+        // if (agreements.length === 0) {
+        //     throw Error('expected agreement')
+        // }
+
+        await this.logout()
+    }
+}
+class GetDataWithoutPolicy extends FlowRunner {
+    constructor() {
+        super('Getting data with policy present flow', FlowRunnerResult.Fail)
+    }
+    protected async runFlow(): Promise<void> {
+        await this.login()
+
+        await this.foodSolidLib.getData(resourceString, purposes)
+        const agreements: [] = await this.adminSolidLib.getLogEntries()
+
+        if (agreements.length === 0) {
+            throw Error('expected agreement')
+        }
+
+        await this.logout()
+    }
+}
+class NotLoggedInFoodStore extends FlowRunner {
+    constructor() {
+        super('Getting Data without logged in (food store - IDP)', FlowRunnerResult.Fail)
+    }
+    protected async runFlow(): Promise<void> {
+        await this.adminSolidLib.login()
+
+        await this.adminSolidLib.addPolicy(policy)
+        await this.foodSolidLib.getData(resourceString, purposes)
+        const agreements: [] = await this.adminSolidLib.getLogEntries()
+
+        if (agreements.length === 0) {
+            throw Error('expected agreement')
+        }
+
+        await this.logout()
+    }
+}
+
 async function main() {
     const close = await setup(podId)
     clearStores()
@@ -107,20 +179,24 @@ async function main() {
     console.log('')
     const flows: FlowRunner[] = [
         new HappyFlow(),
-        new NotLoggedIn()
+        new NotLoggedInAll(),
+        new AddPolicyFlow(),
+        new GetDataWithTrust(),
+        new GetDataWithoutPolicy(),
+        new NotLoggedInFoodStore(),
     ]
 
     const results: FlowRunnerOutput[] = []
 
     for (const flow of flows) {
         results.push(await flow.run())
+        clearStores()
     }
     await close();
-    clearStores()
     console.log('');
     console.log(`Number of flows implemented: ${results.length}.`);
     console.log(`Number of flows working correctly: ${results.filter(output => output.expectedResult === output.result).length}.`);
-    results.forEach(output => console.log(`${output.type} - status: ${output.expectedResult === output.result ? 'succesful': `failure: Error ${output.error}`}`));
+    results.forEach(output => console.log(`${output.type} - status: ${output.expectedResult === output.result ? 'succesful' : `failure: Error ${output.error}`}`));
 
     process.exit()
 
