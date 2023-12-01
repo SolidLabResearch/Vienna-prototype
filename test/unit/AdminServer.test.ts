@@ -3,6 +3,7 @@
 import { Session } from "@rubensworks/solid-client-authn-isomorphic"
 import { getAuthenticatedSession } from "../../SolidPod/Util/CSSAuthentication"
 import { AdminInterface } from "../../SolidPod/Interfaces/AdminInterface/api"
+import { ServiceInfo } from "../../SolidPod"
 
 
 const port = 8060
@@ -15,9 +16,16 @@ describe('an Admin Interface request', () => {
 
     beforeAll(async () => {
         // TODO: run admin server; currently assumes admin server is running at port 8060
-
+        const info: ServiceInfo = {
+            webId: "",
+            podId: "",
+            keyPair: {
+                privateKey: "useless at this moment" as any,
+                publicKey: "for this purpose; shouldn't have been added as necessary req of abstract class... it is not necessary yet for all interfaces" as any
+            }
+        }
         require('dotenv').config()
-        adminInterface = new AdminInterface()
+        adminInterface = new AdminInterface(info)
         adminInterface.start(port)
 
         const webId: string = process.env.WEB_ID!
