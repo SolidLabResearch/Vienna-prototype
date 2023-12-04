@@ -19,7 +19,11 @@ Can be online visualised via [sequencediagram.org](https://sequencediagram.org/)
 
 ![](../img/shop-get-data-version-not-signing-data.svg)
 
-
+## Repository organization
+* The `ExternalServices` directory contains third party services that deliver signed data.
+* The `SolidLib` directory contains the library with all functions that a client needs to be Solid-Aware (both admin and non-admin)
+* The `SolidPod` directory contains the Solid server Interfaces and backend components
+* 
 ## Installing
 ```sh
 npm i

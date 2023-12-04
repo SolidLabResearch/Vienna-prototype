@@ -6,11 +6,13 @@ import * as n3  from 'n3';
 
 import * as crypto from 'crypto';
 
-import { signContent, generateKeyPair } from "../SolidPod/Util/packaging/createSignedPackage"
+import { signContent, generateKeyPair, createContentSignatureFromN3String } from "../SolidPod/Util/packaging/createSignedPackage"
+import { packageContent } from '../SolidPod/Util/packaging/package';
 
 
 export async function run() {
 
+    const baseURI = `http://localhost:${port}/`
     const compid = `http://localhost:${port}/company/id`
 
     let keypair = await generateKeyPair();
@@ -39,9 +41,19 @@ export async function run() {
             writer.end((error: any, result: any) => { resolve(result) });
         })
 
-        let content = await signContent(tripleString, compid, keypair.privateKey)
+        let signature = await createContentSignatureFromN3String(tripleString, keypair.privateKey)
 
-        res.status(200).contentType('text/n3').send(content)
+        let packagedContent = packageContent(tripleString, {
+            sign: {
+                issuer: compid,
+                signature
+            },
+            origin: baseURI + `/company/endpoint/licensekey`,
+        })
+
+        // let content = await signContent(tripleString, compid, keypair.privateKey)
+
+        res.status(200).contentType('text/n3').send(packagedContent)
     })
 
     app.get('/company/endpoint/dob', async (req, res) => {
@@ -62,10 +74,18 @@ export async function run() {
             writer.addQuad(bdateTriple)
             writer.end((error: any, result: any) => { resolve(result) });
         })
+        
+        let signature = await createContentSignatureFromN3String(tripleString, keypair.privateKey)
 
-        let content = await signContent(tripleString, compid, keypair.privateKey)
+        let packagedContent = packageContent(tripleString, {
+            sign: {
+                issuer: compid,
+                signature
+            },
+            origin: baseURI + `/company/endpoint/dob`,
+        })
 
-        res.status(200).contentType('text/n3').send(content)
+        res.status(200).contentType('text/n3').send(packagedContent)
     })
 
     app.get('/company/id', async (req, res) => {

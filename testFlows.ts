@@ -1,5 +1,6 @@
 import { SolidLib } from './SolidLib/Interface/SolidLib';
 import { clearStores, setup } from './setup';
+import chalk from 'chalk';
 
 const podId = "steve"
 
@@ -236,7 +237,9 @@ async function main() {
     console.log('');
     console.log(`Number of flows implemented: ${results.length}.`);
     console.log(`Number of flows working correctly: ${results.filter(output => output.expectedResult === output.result).length}.`);
-    results.forEach(output => console.log(`${output.type} - status: ${output.expectedResult === output.result ? 'succesful' : `failure: Error ${output.error}`}`));
+    results.forEach(output => console.log(
+        `[${output.expectedResult === output.result ? chalk.green.bold('success') : chalk.red.bold('failure')}] ${output.type} ${output.expectedResult === output.result ? '' : `- error: ${output.error}`}`
+    ));
 
     process.exit()
 

@@ -20,8 +20,8 @@ const headers = `
  * 
  * @param {string} path // Path of file to package
  * @param {Object} options 
- * @param {string=} options.packagedBy // Actor responsible for the packaging
- * @param {string=} options.packagedFrom // Origin of the packaged data
+ * @param {string=} options.actor // Actor responsible for the packaging
+ * @param {string=} options.origin // Origin of the packaged data
  * @param {string=} options.duration // Duration for which the receiving actor can use the data, takes a XSD duration
  * @param {string=} options.purpose // Purpose of the packaging - Usage Policy, takes a URL input of the purpos
  * @param {string=} options.documentUri // URI of the document -- TODO:: remove this and make inverse relation
@@ -56,8 +56,8 @@ exports.packageFileContent = async function packageFileContent(path, options) {
  * 
  * @param {string} content // content to be packaged
  * @param {Object} options 
- * @param {string=} options.packagedBy // Actor responsible for the packaging
- * @param {string=} options.packagedFrom // Origin of the packaged data
+ * @param {string=} options.actor // Actor responsible for the packaging
+ * @param {string=} options.origin // Origin of the packaged data
  * @param {string=} options.duration // Duration for which the receiving actor can use the data, takes a XSD duration
  * @param {string=} options.purpose // Purpose of the packaging - Usage Policy, takes a URL input of the purpos
  * @param {string=} options.documentUri // URI of the document -- TODO:: remove this and make inverse relation
@@ -78,8 +78,8 @@ exports.packageContent = function packageContent(content, options) {
  * 
  * @param {*} lines 
  * @param {*} options 
- * @param {string=} options.packagedBy // Actor responsible for the packaging
- * @param {string=} options.packagedFrom // Origin of the packaged data
+ * @param {string=} options.actor // Actor responsible for the packaging
+ * @param {string=} options.origin // Origin of the packaged data
  * @param {string=} options.duration // Duration for which the receiving actor can use the data, takes a XSD duration
  * @param {string=} options.purpose // Purpose of the packaging - Usage Policy, takes a URL input of the purpos
  * @param {string=} options.documentUri // URI of the document -- TODO:: remove this and make inverse relation
@@ -134,8 +134,8 @@ ${doubleSpacing}};
 
 function addProvenance(options, spacing) {
     let metadata = []
-    if(options.packagedBy) metadata.push(`${spacing}pack:packagedBy <${options.packagedBy}>`)
-    if(options.packagedFrom) metadata.push(`${spacing}pack:packagedFrom <${options.packagedFrom}>`)
+    if(options.actor) metadata.push(`${spacing}pack:actor <${options.actor}>`)
+    if(options.origin) metadata.push(`${spacing}pack:origin <${options.origin}>`)
     metadata.push(`${spacing}pack:packagedAt "${new Date().toISOString()}"^^xsd:dateTime`)
     return metadata;
 }
@@ -168,7 +168,7 @@ ${spacing}${doubleSpacing}]`)
 
     let policyBody =
 `${spacing}policy:hasContentPolicy [
-${spacing}${singleSpacing}dcterms:creator <${options.packagedBy}> ;
+${spacing}${singleSpacing}dcterms:creator <${options.actor}> ;
 ${spacing}${singleSpacing}dcterms:description "Data Usage Policy" ;
 ${spacing}${singleSpacing}dcterms:issued "${new Date().toISOString()}"^^xsd:dateTime ;
 ${spacing}${singleSpacing}odrl:permission [

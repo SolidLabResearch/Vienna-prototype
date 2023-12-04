@@ -110,8 +110,8 @@ export class DataInterface extends PublicInterface {
 
             // Package the government data in the correct provenance
             let provenanceWrappedPackage = await pack.packageContent(packageString, {
-                packagedBy: this.info.webId, // TODO:: This should not be the WebID -> either endpoint or delete
-                packagedFrom: endpoint,
+                // actor: this.info.webId, // TODO:: This should not be the WebID -> either endpoint or delete
+                origin: endpoint,
                 purpose: "https://gdpr.org/purposes/Research", // TODO:: We need to link this to the agreement purpose
             })
 

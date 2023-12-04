@@ -7,6 +7,16 @@ import {RDFC10, Quads } from 'rdfjs-c14n';
 
 import { subtle, webcrypto } from 'crypto';
 
+export async function createContentSignatureFromN3String(content: string, privateKey: webcrypto.CryptoKey) {
+    let signature = await signDataGraph(n3toQuadArray(content), privateKey)
+    return Buffer.from(signature).toString('base64') 
+}
+
+export async function createContentSignatureFromQuads(content: n3.Quad[], privateKey: webcrypto.CryptoKey) {
+    let signature = await signDataGraph(content, privateKey)
+    return Buffer.from(signature).toString('base64') 
+}
+
 export async function signContent(content: string, issuer: string, privateKey: webcrypto.CryptoKey) {
     let signature = await signDataGraph(n3toQuadArray(content), privateKey)
     let signatureString = Buffer.from(signature).toString('base64') 

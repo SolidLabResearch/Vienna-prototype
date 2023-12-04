@@ -6,11 +6,13 @@ import * as n3  from 'n3';
 
 import * as crypto from 'crypto';
 
-import { signContent, generateKeyPair } from "../SolidPod/Util/packaging/createSignedPackage"
+import { signContent, generateKeyPair, createContentSignatureFromN3String } from "../SolidPod/Util/packaging/createSignedPackage"
+import { packageContent } from '../SolidPod/Util/packaging/package';
 
 
 export async function run() {
 
+    const baseURI = `http://localhost:${port}` 
     const govid = `http://localhost:${port}/flandersgov/id`
 
     let keypair = await generateKeyPair();
@@ -37,9 +39,17 @@ export async function run() {
             writer.end((error: any, result: any) => { resolve(result) });
         })
 
-        let content = await signContent(tripleString, govid, keypair.privateKey)
+        let signature = await createContentSignatureFromN3String(tripleString, keypair.privateKey)
 
-        res.status(200).contentType('text/n3').send(content)
+        let packagedContent = packageContent(tripleString, {
+            sign: {
+                issuer: govid,
+                signature
+            },
+            origin: baseURI + `/flandersgov/endpoint/dob`,
+        })
+
+        res.status(200).contentType('text/n3').send(packagedContent)
     })
 
     app.get('/flandersgov/endpoint/name', async (req, res) => {
@@ -55,8 +65,17 @@ export async function run() {
             n3.DataFactory.literal("Bob The Builder")
         );
 
-        let content = await signContent(bdateTriple, govid, keypair.privateKey)
-        res.status(200).contentType('text/n3').send(content)
+        let signature = await createContentSignatureFromN3String(bdateTriple, keypair.privateKey)
+
+        let packagedContent = packageContent(bdateTriple, {
+            sign: {
+                issuer: govid,
+                signature
+            },
+            origin: baseURI + `/flandersgov/endpoint/name`,
+        })
+
+        res.status(200).contentType('text/n3').send(packagedContent)
     })
 
 
@@ -98,9 +117,17 @@ export async function run() {
             writer.end((error: any, result: any) => { resolve(result) });
         })
 
-        let content = await signContent(tripleString, govid, keypair.privateKey)
+        let signature = await createContentSignatureFromN3String(tripleString, keypair.privateKey)
 
-        res.status(200).contentType('text/n3').send(content)
+        let packagedContent = packageContent(tripleString, {
+            sign: {
+                issuer: govid,
+                signature
+            },
+            origin: baseURI + `/flandersgov/endpoint/address`,
+        })
+
+        res.status(200).contentType('text/n3').send(packagedContent)
     })
 
 
