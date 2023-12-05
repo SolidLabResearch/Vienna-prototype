@@ -6,7 +6,7 @@ import { IdentityInterface } from './Interfaces/IdentityInterface/api'
 
 import { generateKeyPair, n3toQuadArray } from './Util/packaging/createSignedPackage'
 import { ServerConfigurator } from '@solid/community-server'
-import { DataStorageComponent } from './Components/DataStorage/DataStorageComponent'
+import { DataStorageComponent } from './Components/Storage/DataStorageComponent'
 import { Quad } from 'n3'
 
 
@@ -57,7 +57,7 @@ export async function startPod(podId: string) {
     // Components
     const dataStorageComponent = new DataStorageComponent(serviceInfo);
 
-    await dataStorageComponent.backdoorAddData(await prefetch(webId))
+    await dataStorageComponent.addData(await prefetch(webId))
 
     // Interfaces
     const adminInterface = new AdminInterface(serviceInfo)

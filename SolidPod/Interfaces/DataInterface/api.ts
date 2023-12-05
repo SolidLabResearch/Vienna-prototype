@@ -9,7 +9,7 @@ import express from 'express';
 import { Server} from 'http';
 import { PublicInterface } from "../PublicInterface";
 import { ServiceInfo } from "../..";
-import { DataStorageComponent } from "../../Components/DataStorage/DataStorageComponent";
+import { DataStorageComponent } from "../../Components/Storage/DataStorageComponent";
 
 
 

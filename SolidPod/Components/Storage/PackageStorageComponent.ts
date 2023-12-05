@@ -6,9 +6,12 @@ import { ServiceInfo } from "../..";
 const packagePredicate = "https://example.org/ns/package#packages"
 const contentPredicate = "https://example.org/ns/package#content"
 
-export class DataStorageComponent extends Component {
+/**
+ * This component handles the storage and retrieval of packaged data.
+ */
+export class PackageStorageComponent extends Component {
 
-    store: Store;
+    private store: Store;
 
     constructor(info: ServiceInfo) {
         super(info);
@@ -20,12 +23,17 @@ export class DataStorageComponent extends Component {
 
     async close() {}
 
-        
-    async backdoorAddData(quads: Quad[]) {
-        await this.store.addQuads(quads);
+    /**
+     * Add package quads to the quadstore.
+     * note: This function removes all quads in the default graph that are not a package!
+     */
+    protected async addPackage(quads: Quad[]) {
+        let filteredQuads = quads.filter(q => !q.graph.equals(DataFactory.defaultGraph()) || q.predicate.value === packagePredicate)
+        this.store.addQuads(filteredQuads);
     }
 
     /**
+    * Extracting Packages From Match Algorithm
     * 
     * 1. Find the graph value of the quad
     * 2. check if the graph value is the object of a << [] pack:content _:graph _:packageGraph >> quad.
@@ -39,14 +47,30 @@ export class DataStorageComponent extends Component {
     * 8. Serialize the package structure using Jesse's magic lib
     * 
     */
-    public async getData(matchTriple: Quad) : Promise<Quad[]> {
+
+    /**
+     * Get all packages containing a match for the requested triple as a list of quads
+     */
+    protected async getPackagesWithMatch(match: Quad) : Promise<Quad[]> {
+        let dataGraphs = await this.getSeparatePackagesWithMatch(match)
+        let combinedDataGraphs: Quad[] = []
+        for (let graph of dataGraphs) {
+            combinedDataGraphs = combinedDataGraphs.concat(graph)
+        } 
+        return combinedDataGraphs;
+    }
+
+    /**
+     * Get all packages containing a match for the requested triple as separate lists of quads
+     */
+    protected async getSeparatePackagesWithMatch(match: Quad) : Promise<Quad[][]> {
 
         let rootPackages: Quad[] = []
 
         // 1. Find the graph value of the quad
-        let subject = matchTriple.subject.termType === "Variable" ? null : matchTriple.subject ;
-        let predicate = matchTriple.predicate.termType === "Variable" ? null : matchTriple.predicate ;
-        let object = matchTriple.object.termType === "Variable" ? null : matchTriple.object ;
+        let subject = match.subject.termType === "Variable" ? null : match.subject ;
+        let predicate = match.predicate.termType === "Variable" ? null : match.predicate ;
+        let object = match.object.termType === "Variable" ? null : match.object ;
         
         let matches = this.store.getQuads(subject, predicate, object, null);
         if (!matches || matches.length === 0) return []
@@ -76,38 +100,21 @@ export class DataStorageComponent extends Component {
             matches = newMatches;
         }
         
-        let dataGraph : Quad[] = []
+        let dataGraphs: Quad[][] = []
         
         // 6. We do this through a flood fill, of taking a list of ALL package graphs
+        let i = 0;
         for (let rootPackage of rootPackages) {
+            let dataGraph : Quad[] = []
             dataGraph = dataGraph.concat(rootPackage)
             dataGraph = dataGraph.concat(
                 this.extractSubgraphFromStore(this.store, rootPackage.object)
             )
-        }   
-        
-        return dataGraph
-        
-    }
-
-    private async serializeN3Quads(quads: Quad[]) {
-
-        if (!quads || quads.length === 0) {
-            throw new Error('No matches found for your request')
+            dataGraphs[i] = dataGraph
+            i++
         }
-
-        // 8. Serialize the package structure using Jesse's magic lib
-        let packageString = await write(quads, {format: "text/n3", prefixes: {
-            "pack": "https://example.org/ns/package#",
-            "policy": "https://example.org/ns/policy#",
-            "sign": "https://example.org/ns/signature#",
-        }});
-
-        // Remove empty lines
-        packageString = packageString.replace(/(^[ \t]*\n)/gm, "")
-        return packageString;
-        
-    }    
+        return dataGraphs
+    }
 
     private extractSubgraphFromStore(store: Store, graph: Term): Quad[] {
         let subgraphQuads: Quad[] = []
@@ -127,11 +134,3 @@ export class DataStorageComponent extends Component {
     }
     
 }
-
-
-
-
-
-
-
-

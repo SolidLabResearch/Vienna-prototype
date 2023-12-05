@@ -7,7 +7,7 @@ import * as n3  from 'n3';
 import * as crypto from 'crypto';
 
 import { signContent, generateKeyPair, createContentSignatureFromN3String } from "../SolidPod/Util/packaging/createSignedPackage"
-import { packageContent } from '../SolidPod/Util/packaging/package';
+import { packageContentString } from '../packaging/package';
 
 
 export async function run() {
@@ -43,10 +43,10 @@ export async function run() {
 
         let signature = await createContentSignatureFromN3String(tripleString, keypair.privateKey)
 
-        let packagedContent = packageContent(tripleString, {
+        let packagedContent = await packageContentString(tripleString, {
             sign: {
                 issuer: compid,
-                signature
+                value: signature
             },
             origin: baseURI + `/company/endpoint/licensekey`,
         })
@@ -77,10 +77,10 @@ export async function run() {
         
         let signature = await createContentSignatureFromN3String(tripleString, keypair.privateKey)
 
-        let packagedContent = packageContent(tripleString, {
+        let packagedContent = await packageContentString(tripleString, {
             sign: {
                 issuer: compid,
-                signature
+                value: signature
             },
             origin: baseURI + `/company/endpoint/dob`,
         })
