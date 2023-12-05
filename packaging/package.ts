@@ -17,8 +17,8 @@ type PackageOptions = {
     documentUri?: string,    // URI of the document -- TODO:: remove this and make inverse relation
     contentType?: string,    // content type of the content
     policy?: {               // Policies of the content
-        duration: string,   // Duration for which the receiving actor can use the data, takes a XSD duration
-        purpose: string,    // Purpose of the packaging - Usage Policy, takes a URL input of the purpose
+        duration?: string,   // Duration for which the receiving actor can use the data, takes a XSD duration
+        purpose?: string,    // Purpose of the packaging - Usage Policy, takes a URL input of the purpose
         issuer: string,     // Issuer of the signature
     },
     sign?: {                 // Signature of the content

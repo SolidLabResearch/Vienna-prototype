@@ -4,7 +4,7 @@ import { LogInterface } from './Interfaces/LogInterface/api'
 import { DataInterface } from './Interfaces/DataInterface/api'
 import { IdentityInterface } from './Interfaces/IdentityInterface/api'
 
-import { generateKeyPair, n3toQuadArray } from './Util/packaging/createSignedPackage'
+import { generateKeyPair, n3toQuadArray } from '../packaging/createSignedPackage'
 import { ServerConfigurator } from '@solid/community-server'
 import { DataStorageComponent } from './Components/Storage/DataStorageComponent'
 import { Quad } from 'n3'

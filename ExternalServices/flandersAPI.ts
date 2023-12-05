@@ -6,7 +6,7 @@ import * as n3  from 'n3';
 
 import * as crypto from 'crypto';
 
-import { signContent, generateKeyPair, createContentSignatureFromN3String } from "../SolidPod/Util/packaging/createSignedPackage"
+import { signContent, generateKeyPair, createContentSignatureFromN3String } from "../packaging/createSignedPackage"
 import { packageContentString } from '../packaging/package';
 
 

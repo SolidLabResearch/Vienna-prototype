@@ -1,11 +1,10 @@
 //@ts-ignore
-import * as pack from "./package"
-
 import * as n3  from 'n3';
 import * as rdf from 'rdf-js';
 import {RDFC10, Quads } from 'rdfjs-c14n';
 
 import { subtle, webcrypto } from 'crypto';
+import { packageContentString } from "./package";
 
 export async function createContentSignatureFromN3String(content: string, privateKey: webcrypto.CryptoKey) {
     let signature = await signDataGraph(n3toQuadArray(content), privateKey)
@@ -21,10 +20,10 @@ export async function signContent(content: string, issuer: string, privateKey: w
     let signature = await signDataGraph(n3toQuadArray(content), privateKey)
     let signatureString = Buffer.from(signature).toString('base64') 
 
-    return pack.packageContent(content, {
+    return packageContentString(content, {
         sign: {
-            signature: signatureString,
-            issuer: issuer,
+            issuer,
+            value: signatureString,
         },
     })
 

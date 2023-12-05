@@ -2,7 +2,7 @@
 import * as pack from "../../Util/packaging/package"
 import * as n3  from 'n3';
 import * as crypto from 'crypto';
-import { n3toQuadArray, signContent } from "../../Util/packaging/createSignedPackage";
+import { n3toQuadArray, signContent } from "../../../packaging/createSignedPackage";
 import { write } from '@jeswr/pretty-turtle';
 import { AuthZToken } from "../../../SolidLib/Interface/ISolidLib";
 import express from 'express';
@@ -10,6 +10,7 @@ import { Server} from 'http';
 import { PublicInterface } from "../PublicInterface";
 import { ServiceInfo } from "../..";
 import { DataStorageComponent } from "../../Components/Storage/DataStorageComponent";
+import { packageContentString } from "../../../packaging/package";
 
 
 
@@ -109,10 +110,13 @@ export class DataInterface extends PublicInterface {
 
 
             // Package the government data in the correct provenance
-            let provenanceWrappedPackage = await pack.packageContent(packageString, {
+            let provenanceWrappedPackage = await packageContentString(packageString, {
                 // actor: this.info.webId, // TODO:: This should not be the WebID -> either endpoint or delete
                 origin: endpoint,
-                purpose: "https://gdpr.org/purposes/Research", // TODO:: We need to link this to the agreement purpose
+                policy: {
+                    issuer: this.info.webId,
+                    purpose: "https://gdpr.org/purposes/Research", // TODO:: We need to link this to the agreement purpose
+                }
             })
 
             // Sign the package as the Pod

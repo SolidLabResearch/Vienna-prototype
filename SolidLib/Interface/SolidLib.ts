@@ -4,7 +4,7 @@ import { n3reasoner } from "eyereasoner/dist";
 import { DataFactory as DF, DataFactory, Parser, Store } from "n3";
 import { getAuthenticatedSession } from "../../SolidPod/Util/CSSAuthentication";
 import { Action, Agreement, AuthZToken, DataPlus, DataPlusPlus, SolidAuthZRequestMessage } from "./ISolidLib";
-import { validateSignatures } from '../../SolidPod/Util/packaging/validateSignatures';
+import { validateSignatures } from "../../packaging/validateSignatures";
 
 const { namedNode } = DataFactory
 
