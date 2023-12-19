@@ -74,7 +74,7 @@ async function getIdp(webID: string): Promise<string> {
             "Accept": 'text/turtle'
         }
     })
-    const store = await turtleStringToStore(await response.text())
+    const store = await turtleStringToStore(await response.text(), response.url)
     const idp = store.getQuads(namedNode(webID), SOLID.terms.oidcIssuer, null, null)[0].object.value
     return idp + 'idp/' // Note: don't know if that should or should not be added.
 }
