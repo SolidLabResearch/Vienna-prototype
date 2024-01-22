@@ -10,11 +10,6 @@ const { namedNode } = DataFactory
 
 export class SolidLib {
     // hardcoded interface Urls
-    private adminInterfaceUrl: string = "http://localhost:8060/"
-    private AuthZInterfaceUrl: string = "http://localhost:8050/"
-    private dataInterfaceUrl: string = `http://localhost:8040/${this.podId}/endpoint` // TODO:: how to get NAME value here?
-    private logInterfaceURL: string = "http://localhost:8030/"
-
     private session: Session | undefined;
 
     private readonly prefixes = {
@@ -35,22 +30,35 @@ export class SolidLib {
     :Jesse rot:trusts <http://localhost:3456/flandersgov/id> .
   `
 
-    constructor(private client: string, private podId: string) {
+    constructor(private client: string, private webId: string) {
 
     }
 
-    public async login(IDP?: string): Promise<void> {
+    public async loadInterfaces() {
+        console.log("loading from", this.webId)
+        const webIdData = await (await fetch(this.webId)).text()
+        const store = new Store(new Parser({ format: 'text/n3' }).parse(webIdData));
+        let interfaceEndpoints = {
+            "admin": store.getQuads(null, "http://example.org/ns/adminEndpoint", null, null)[0].object.value,
+            "authZ": store.getQuads(null, "http://example.org/ns/authZEndpoint", null, null)[0].object.value,
+            "data": store.getQuads(null, "http://example.org/ns/dataEndpoint", null, null)[0].object.value,
+            "log": store.getQuads(null, "http://example.org/ns/logEndpoint", null, null)[0].object.value,
+        }
+        return interfaceEndpoints
+    }
+
+    public async login(webId?: string, email?: string, password?: string ): Promise<void> {
         require('dotenv').config()
 
         console.log("[SolidLib]:login - Logging in.")
         // TODO: client hardcoded through passing constructor, should be the login screen in a proper demo
-        const webId: string = process.env.WEB_ID!
-        const username: string = process.env.USER_NAME!
-        const password: string = process.env.PASSWORD!
+        webId = webId || process.env.WEB_ID!
+        email = email || process.env.USER_NAME!
+        password = password || process.env.PASSWORD!
         const session = await getAuthenticatedSession({
-            webId: webId,
-            email: username,
-            password: password,
+            webId,
+            email,
+            password,
             client: this.client
         })
 
@@ -67,6 +75,7 @@ export class SolidLib {
     }
 
     public async getData(query: string, purpose: string[]): Promise<DataPlusPlus> {
+        let interfaceEndpoints = await this.loadInterfaces()
         // stubbed: Don't have access
         console.log(`SolidLib]:getData - No access, need AuthZ token.`)
         const authZRequestMessage: SolidAuthZRequestMessage = {
@@ -99,7 +108,7 @@ export class SolidLib {
         }
 
         // session.fetch already has a lot of stuff in the authorization token
-        let response = await fetch(this.dataInterfaceUrl, {
+        let response = await fetch(interfaceEndpoints.data, {
             method: "POST",
             headers: {
                 "content-type": "text/n3",
@@ -149,6 +158,8 @@ export class SolidLib {
       @prefix rot: <https://purl.org/krdb-core/rot/rot#> .
       @prefix : <http://example.org/> .
     
+      // The next three rules connect the contents with all parent packages, 
+      // to then enact the required rules over them
       {
         ?pack pack:packages ?package .
         ?package log:includes { [] pack:content ?content } .
@@ -218,8 +229,9 @@ export class SolidLib {
         if (!this.session) {
             throw Error("No session")
         }
+        let interfaceEndpoints = await this.loadInterfaces()
 
-        let response = await this.session.fetch(this.adminInterfaceUrl, {
+        let response = await this.session.fetch(interfaceEndpoints.admin, {
             method: "POST",
             headers: {
                 "content-type": "text/turtle"
@@ -244,7 +256,7 @@ export class SolidLib {
         const authZToken = await (await this.getAuthZToken(authZRequestMessage)).token
         console.log(`SolidLib]:addPolicy - Now that token is there, add Policy`, authZToken)
 
-        response = await fetch(this.adminInterfaceUrl, {
+        response = await fetch(interfaceEndpoints.admin, {
             method: "POST",
             headers: {
                 authorization: `${authZToken.type} ${authZToken.access_token}`,
@@ -261,13 +273,15 @@ export class SolidLib {
 
     // note: Wout comment: I think it will only be one agreement per authztoken.
     private async getAuthZToken(authZRequestMessage: SolidAuthZRequestMessage): Promise<{ token: AuthZToken, agreements: Agreement[] }> {
+        let interfaceEndpoints = await this.loadInterfaces()
         const agreements: Agreement[] = []
         if (!this.session) {
             throw Error("No session")
         }
+        
 
-        console.log(`[SolidLib]:getAuthZToken - Requesting Authorization token at ${this.AuthZInterfaceUrl}.`)
-        const res = await this.session.fetch(this.AuthZInterfaceUrl, {
+        console.log(`[SolidLib]:getAuthZToken - Requesting Authorization token at ${interfaceEndpoints.authZ}.`)
+        const res = await this.session.fetch(interfaceEndpoints.authZ, {
             method: "POST",
             headers: {
                 "content-type": "application/json"
@@ -308,7 +322,7 @@ export class SolidLib {
 
             agreements.push(agreement as Agreement);
 
-            const agreementResponse = await this.session.fetch(this.AuthZInterfaceUrl, {
+            const agreementResponse = await this.session.fetch(interfaceEndpoints.authZ, {
                 method: "POST",
                 headers: {
                     "content-type": "application/json"
@@ -336,6 +350,7 @@ export class SolidLib {
 
     // Admin only
     public async getLogEntries(): Promise<[]> {
+        let interfaceEndpoints = await this.loadInterfaces()
         const authZRequestMessage: SolidAuthZRequestMessage = {
             authNToken: {
                 WebID: this.session?.info.webId ?? "",
@@ -348,7 +363,7 @@ export class SolidLib {
         const authZToken = await (await this.getAuthZToken(authZRequestMessage)).token
         console.log(`SolidLib]:addPolicy - Now that token is there, add Policy`, authZToken)
         
-        let response = await fetch(this.logInterfaceURL, {
+        let response = await fetch(interfaceEndpoints.log, {
             method: "GET",
             headers: {
                 authorization: `${authZToken.type} ${authZToken.access_token}`,

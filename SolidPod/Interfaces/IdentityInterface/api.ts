@@ -3,7 +3,7 @@ import bodyParser from 'body-parser';
 import { PolicyStore } from '../../Util/Storage';
 import { Server} from 'http';
 import { serializeCryptoKey } from '../../Util/Util';
-import { IdentityServiceInfo, ServiceInfo } from '../..';
+import { EndpointInfo, IdentityServiceInfo, ServiceInfo } from '../..';
 import { PublicInterface } from '../PublicInterface';
 
 export class IdentityInterface extends PublicInterface {
@@ -12,11 +12,11 @@ export class IdentityInterface extends PublicInterface {
     podId?: string;
     keyPair?: CryptoKeyPair;
 
-    storageURL: string;
+    endpointInfo: EndpointInfo;
 
-    constructor(info: ServiceInfo, storageURL: string) {
+    constructor(info: ServiceInfo, endpointInfo: EndpointInfo) {
         super(info);
-        this.storageURL = storageURL;
+        this.endpointInfo = endpointInfo;
     }
 
     public async start(port: number): Promise<void> {
@@ -24,7 +24,7 @@ export class IdentityInterface extends PublicInterface {
         this.keyPair = this.info.keyPair;
         this.podId = this.info.podId;
         
-        let app = await this.runInterface(this.storageURL)
+        let app = await this.runInterface()
         this.server = app.listen(port, () => {
             console.log(`Identity Interface (WebId) listening on ${port}`)
             console.log("WebId:", this.webId)
@@ -39,7 +39,7 @@ export class IdentityInterface extends PublicInterface {
         return this.webId;
     }
 
-    private async runInterface(storageURL: string) {
+    private async runInterface() {
 
         if (!this.keyPair) throw new Error('KeyPair not instantiated.')
 
@@ -50,12 +50,19 @@ export class IdentityInterface extends PublicInterface {
         app.get(`/${this.podId}/id`, async (req: any, res: any) => {
         
             let webIdString = 
-`@prefix foaf: <http://xmlns.com/foaf/0.1/>.
+`@prefix : <http://example.org/ns/>.
+@prefix foaf: <http://xmlns.com/foaf/0.1/>.
+@prefix solid: <http://www.w3.org/ns/solid/terms#>.
 @prefix pim: <http://www.w3.org/ns/pim/space#>.
 
 <${this.webId}> a foaf:Person;
     foaf:name "${this.info.podId}"@en;
-    pim:storage <${storageURL}>;
+    solid:oidcIssuer <${this.info.IDPServerId}>;
+    pim:storage <${this.endpointInfo.dataEndpoint}>;
+    :dataEndpoint <${this.endpointInfo.dataEndpoint}>;
+    :adminEndpoint <${this.endpointInfo.adminEndpoint}>;
+    :logEndpoint <${this.endpointInfo.logEndpoint}>;
+    :authZEndpoint <${this.endpointInfo.authZEndpoint}>;
     <http://www.w3.org/ns/auth/cert#key>  "${keyString}".
 `
             res.status(200).contentType('text/turtle').send(webIdString)

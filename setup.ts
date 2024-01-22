@@ -1,8 +1,11 @@
 import { run as runCompanyAPI } from './ExternalServices/companyAPI'
 import { run as runFlandersAPI } from './ExternalServices/flandersAPI'
+import { IDPServer } from './IDP/setup'
 import { LogStore, PolicyStore } from './SolidPod/Util/Storage'
-import { startPod } from './SolidPod/index'
+import { SolidPod, SolidServerOptions } from './SolidPod/index'
 
+const IDPServerPort = 7834
+const IDPServerId = `http://localhost:${IDPServerPort}`
 
 export function clearStores() {
   console.log('')
@@ -22,16 +25,58 @@ export async function setup(podId: string) {
   console.log('')
   const company = await runCompanyAPI()
   const flanders = await runFlandersAPI()
+
+  console.log('')
+  console.log('######################################')
+  console.log('Setting up Identity Provider')
+  console.log('######################################')
+  console.log('')
+  const idpServer = new IDPServer();
+  idpServer.start(IDPServerPort)
+
   console.log('')
   console.log('######################################')
   console.log('Setting up Pod Interfaces')
   console.log('######################################')
   console.log('')
-  const pod = await startPod(podId)
+  const pod = new SolidPod();
+  await pod.initialize({podId, IDPServerId})
 
   return async () => {
-      await new Promise(res => company.close(res));
-      await new Promise(res => flanders.close(res));
-      await Promise.all(pod.map(p => p.stop()));
+    await new Promise(res => company.close(res));
+    await new Promise(res => flanders.close(res));podId
+    await Promise.all(Array.from(pod.interfaces.values()).map(p => p&&p.stop()));
+    await idpServer.stop();
   }
+}
+
+
+export async function setupOnlyAPIs() {
+  console.log('######################################')
+  console.log('Setting Up External APIs to fetch data')
+  console.log('######################################')
+  console.log('')
+  const company = await runCompanyAPI()
+  const flanders = await runFlandersAPI()
+  return async () => {
+    await new Promise(res => company.close(res));
+    await new Promise(res => flanders.close(res));
+  }
+}
+
+export async function setupIDP(port: number) {
+  const server = new IDPServer();
+  await server.start(port);
+  return server;
+}
+
+export async function setupOnlyPod(options: SolidServerOptions) {
+  console.log('######################################')
+  console.log('Setting up Pod Interfaces')
+  console.log('######################################')
+  console.log('')
+  const pod = new SolidPod();
+  await pod.initialize(options)
+
+  return pod;
 }

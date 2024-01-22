@@ -21,7 +21,7 @@ app.post('/', async (req, res) => {
         return
     }
 
-    if (req.headers.authorization !== "Bearer verySecretToken.Allowed-to-add-policy") { // proper verification needs to happen here (pref communication to authz server)
+    if (req.headers.authorization !== "Bearer solid.policy-add") { // proper verification needs to happen here (pref communication to authz server)
         // incorrect token
         console.log(`[${new Date().toISOString()}] - Admin: Incorrect AuthZ token.`);
         res

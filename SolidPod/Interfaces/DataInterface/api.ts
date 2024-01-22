@@ -1,12 +1,8 @@
 //@ts-ignore
-import * as pack from "../../Util/packaging/package"
 import * as n3  from 'n3';
-import * as crypto from 'crypto';
-import { n3toQuadArray, signContent } from "../../../packaging/createSignedPackage";
+import { signContent } from "../../../packaging/createSignedPackage";
 import { write } from '@jeswr/pretty-turtle';
-import { AuthZToken } from "../../../SolidLib/Interface/ISolidLib";
 import express from 'express';
-import { Server} from 'http';
 import { PublicInterface } from "../PublicInterface";
 import { ServiceInfo } from "../..";
 import { DataStorageComponent } from "../../Components/Storage/DataStorageComponent";
@@ -35,9 +31,6 @@ export class DataInterface extends PublicInterface {
     public async stop(){
         this.server?.close();
     }
-
-
-
 
     private async runInterface(port: number) {
 

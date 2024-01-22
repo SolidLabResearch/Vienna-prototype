@@ -22,14 +22,9 @@ async function getDataFlow() {
         "advertisement"
     ])
 
-    let logEntries = await solidLib.getLogEntries()
-
     console.log('App flow response')
     console.log(dataplusplus)
 
-    console.log()
-    console.log('Logged Agreements:')
-    console.log(logEntries)
     await solidLib.logout()
 } 
 

@@ -6,7 +6,7 @@ const podId = "steve"
 
 // TODO:: add some colours to the successful / failed logging so we can immediately see failed tests
 
-const resourceString = "?webID <https://www.w3.org/2006/vcard/ns#bday> ?bdate ."
+const resourceString = "?webID ?test ?bdate ."
 const policy = `
 <myPolicy> <a> <Policy>;
     <subject> <food-store>;
@@ -123,14 +123,14 @@ class GetDataWithTrust extends FlowRunner {
         await this.login()
 
         await this.adminSolidLib.addPolicy(policy)
-        await this.foodSolidLib.getDataWithTrust(resourceString, purposes)
+        let data = await this.foodSolidLib.getDataWithTrust(resourceString, purposes)
+        console.log('TESTDATA', data)
 
-        // TODO: do some checking whether data is trusted
-        // const agreements: [] = await this.adminSolidLib.getLogEntries()
+        const agreements: [] = await this.adminSolidLib.getLogEntries()
 
-        // if (agreements.length === 0) {
-        //     throw Error('expected agreement')
-        // }
+        if (agreements.length === 0) {
+            throw Error('expected agreement')
+        }
 
         await this.logout()
     }

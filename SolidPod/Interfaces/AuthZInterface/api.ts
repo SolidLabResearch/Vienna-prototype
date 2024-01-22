@@ -51,6 +51,7 @@ app.post('/', async (req, res) => {
   let authZInterfaceResponse: AuthZInterfaceResponse = {
     result: AuthZInterfaceResponseResult.Error
   }
+
   switch (requestType) {
     case ResourceType.POLICY:
       // give token related to owner is allowed to interact with admin
@@ -61,7 +62,7 @@ app.post('/', async (req, res) => {
         authZInterfaceResponse = {
           result: AuthZInterfaceResponseResult.Token,
           authZToken: {
-            access_token: "verySecretToken.Allowed-to-add-policy",
+            access_token: "solid.policy-add",
             type: 'Bearer' // maybe Dpop, I don't fucking know
           }
         }
@@ -71,8 +72,13 @@ app.post('/', async (req, res) => {
     case ResourceType.LOG:
       // give token related to owner is allowed to interact with log
       console.log(`[${new Date().toISOString()}] - Authz: ${actor} (client: ${client_id}) requesting to add read agreements.`)
+      // TODO:: I don't think we want to hardcode this? This should just be part of the policies.
       if (client_id !== "admin-App") {
         console.log(`[${new Date().toISOString()}] - Authz: SHOULD NOT BE ALLOWED TO GET A TOKEN DUE TO WRONG APP.`)
+        authZInterfaceResponse = {
+          error: "Authz: SHOULD NOT BE ALLOWED TO GET A TOKEN DUE TO WRONG APP.",
+          result: AuthZInterfaceResponseResult.Error
+        }
       } else {
         authZInterfaceResponse = {
           result: AuthZInterfaceResponseResult.Token,
@@ -108,7 +114,6 @@ app.post('/', async (req, res) => {
       break;
 
   }
-
 
   res.status(statusCode)
     .contentType("application/json")

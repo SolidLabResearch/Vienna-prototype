@@ -24,14 +24,9 @@ async function getDataFlow() {
         "advertisement"
     ])
 
-    let logEntries = JSON.stringify(await solidLib.getLogEntries(), null, 2)
-
     console.log('Trusted app flow response')
     console.log(dataplusplustrusted)
 
-    console.log()
-    console.log('Logged Agreements:')
-    console.log(logEntries)
     await solidLib.logout()
 
 }

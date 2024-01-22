@@ -1,0 +1,55 @@
+
+@prefix fn: <http://www.w3.org/2006/xpath-functions#>.
+@prefix crypto: <http://www.w3.org/2000/10/swap/crypto#>.
+@prefix graph: <http://www.w3.org/2000/10/swap/graph#>.
+@prefix log: <http://www.w3.org/2000/10/swap/log#> .
+@prefix time: <http://www.w3.org/2000/10/swap/time#> .
+@prefix func: <http://www.w3.org/2007/rif-builtin-function#>.
+@prefix math: <http://www.w3.org/2000/10/swap/math#>.
+
+[] a dialog:message
+<http://example.org/messages/message1> dialog:hasVerifiedContext {
+  <messageId> dialog:senderClient <client>.
+  <messageId> dialog:senderId <WebID>.
+  <WebID> dialog:issuedBy <OIDCIssuer>.
+}.
+
+<messageDocument> dialog:hasBody {
+  
+  # start incoming message
+
+
+  # message request
+
+  <messageId> dialog:request {
+    <WebID> dialog:trusts {
+      ?person vcard:bday ?bday;
+    }
+  }
+
+  # Mapping rules 
+
+  ## Define trust relation
+
+  { <WebID> dialog:trusts ?something }
+  <=
+  { 
+    ?package pack:hasContentSignature ?signature.
+    ?signature sign:issuer ?issuer.
+    ?issuer list:isPartOf ( <instance1> <instance2> <instance3> ). 
+    ?package pack:contains ?something.  
+  }
+
+  { ?package pack:contains ?something } 
+  <=
+  { ?package log:includes ?something }
+
+  { ?package pack:contains ?something } 
+  <=
+  { 
+    ?package pack:content ?content.
+    ?content log:includes {
+      ?bn pack:package ?childPackage.
+    }.
+    ?childPackage
+  }

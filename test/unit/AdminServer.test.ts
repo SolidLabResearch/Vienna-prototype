@@ -12,7 +12,7 @@ const adminServerURL = `http://localhost:${port}/`
 describe('an Admin Interface request', () => {
     let mgmtSession: Session;
     let adminInterface: AdminInterface;
-    const verySecretToken = "Bearer verySecretToken.Allowed-to-add-policy"
+    const verySecretToken = "Bearer solid.policy-add"
 
     beforeAll(async () => {
         // TODO: run admin server; currently assumes admin server is running at port 8060

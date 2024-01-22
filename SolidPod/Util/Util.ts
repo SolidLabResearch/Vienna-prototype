@@ -3,6 +3,8 @@ import {Store, Writer} from 'n3';
 import {ParseOptions} from "rdf-parse/lib/RdfParser";
 import * as Path from "path";
 
+import crypto from "crypto"
+
 const rdfParser = require("rdf-parse").default;
 const storeStream = require("rdf-store-stream").storeStream;
 const streamifyString = require('streamify-string');

@@ -28,18 +28,11 @@ type PackageOptions = {
     quads?: Quad[],          // Replaces the blankNode with name value "package" for the package blank node
 }
 
-// const resultingDataString = await write(resultingData, {
-//     format: 'text/n3'
-// })
-
-// const reasonedStore = new Store(new Parser({ format: 'text/n3' }).parse(reasoningResult));
-
 export async function packageContentFile(path: string, options: PackageOptions) {
     let n3string = fs.readFileSync(path, {encoding: "utf-8"});
     let quads = new Parser({ format: 'text/n3' }).parse(n3string);
     return processContent(quads, options)
 };
-
 
 export async function packageContentString(n3string: string, options: PackageOptions) { 
     let quads = new Parser({ format: 'text/n3' }).parse(n3string);

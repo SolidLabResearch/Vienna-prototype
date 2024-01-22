@@ -1,0 +1,62 @@
+@prefix : <http://example.or/ns/>.
+@prefix log: <http://www.w3.org/2000/10/swap/log#> .
+@prefix dcterms: <http://purl.org/dc/terms/>.
+@prefix odrl: <http://www.w3.org/ns/odrl/2/>.
+@prefix pack: <https://example.org/ns/package#>.
+@prefix policy: <https://example.org/ns/policy#>.
+@prefix sign: <https://example.org/ns/signature#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix rot: <https://purl.org/krdb-core/rot/rot#> .
+
+@prefix store: <https://store.be/ns#>.
+
+_:policy a policy:Policy;
+    policy:target [
+        a policy:BGPTarget;
+        policy:matches {
+            ?Product a store:Product.
+            ?Product a store:NonAgeRestrictedProduct.
+        };
+        policy:accessRequirements: {
+            
+        };
+        policy:usageRequirements: {
+            
+        };
+        
+    ] 
+
+# Define rules for when something is age restricted
+
+{
+    ?Product a store:Product.
+    (
+       { 
+        ?Product store:alcoholPercentage ?Percentage.
+        ?Percentage math:greaterThan "0"^^Xsd:float.
+        }
+       { ?ProductType log:equalTo store:AgeRestrictedProduct }
+       { ?ProductType log:equalTo store:NonAgeRestrictedProduct }
+    ) log:ifThenElseIn ?SCOPE .
+} => {
+    ?Product a ?ProductType.
+} .
+
+
+
+
+
+_:authRequest a :Request, :AuthorizationRequest;
+    :claims:
+    :issuer [
+        :webId ?webId;
+        :client ?client;
+        :oidcIssuer ?issuer;
+    ]
+    :for {
+        _:dataRequest :GetDataWithContextRequest;
+            :query {
+                _:item rdf:type :Drink
+            }
+        :purpose dpv:ServiceProvision
+    }"

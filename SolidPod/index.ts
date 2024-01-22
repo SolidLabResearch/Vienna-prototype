@@ -4,17 +4,32 @@ import { LogInterface } from './Interfaces/LogInterface/api'
 import { DataInterface } from './Interfaces/DataInterface/api'
 import { IdentityInterface } from './Interfaces/IdentityInterface/api'
 
-import { generateKeyPair, n3toQuadArray } from '../packaging/createSignedPackage'
-import { ServerConfigurator } from '@solid/community-server'
 import { DataStorageComponent } from './Components/Storage/DataStorageComponent'
-import { Quad } from 'n3'
+import { serializeCryptoKey } from './Util/Util'
+import { Component } from './Components/Component'
+import { PublicInterface } from './Interfaces/PublicInterface'
+
+import crypto from "crypto"
 
 
-const adminInterfacePort = 8060
-const authZInterfacePort = 8050
-const dataInterfacePort = 8040
-const logInterfacePort = 8030
-const identityInterfacePort = 8020
+
+let adminInterfacePort = 8060
+let authZInterfacePort = 8050
+let dataInterfacePort = 8040
+let logInterfacePort = 8030
+let identityInterfacePort = 8020
+
+export type SolidServerOptions = {
+    podId: string, 
+    IDPServerId: string,
+    disableAuthorization?: boolean,
+    webId?: string,
+    adminInterfacePort?: number,
+    authZInterfacePort?: number,
+    dataInterfacePort?: number,
+    logInterfacePort?: number,
+    identityInterfacePort?: number,
+}
 
 export type IdentityServiceInfo = {
     podId: string,
@@ -24,69 +39,107 @@ export type IdentityServiceInfo = {
 export type ServiceInfo = {
     webId: string,
     podId: string,
-    keyPair: CryptoKeyPair
+    keyPair: CryptoKeyPair,
+    IDPServerId: string,
 }
 
+export type EndpointInfo = {
+    dataEndpoint: string,
+    authZEndpoint: string,
+    adminEndpoint: string,
+    logEndpoint: string,
+    identityEndpoint: string,
+}
 
-export async function startPod(podId: string) {
-    
-    // Setting up necessary stuff for the Pod server
-    let keyPair = await crypto.subtle.generateKey(
-        {
-            name: "ECDSA",
-            namedCurve: "P-384",
-        },
-        true,
-        ["sign", "verify"]
-    );
+export class SolidPod {
 
-    let serviceInfo : ServiceInfo = {
-        podId, keyPair, webId: ""
+    components: Map<string, Component>;
+    interfaces: Map<string, PublicInterface | undefined>;
+    webId?: string;
+    keyPair?: CryptoKeyPair;
+
+
+    constructor() {
+        this.components = new Map();
+        this.interfaces = new Map();
     }
 
-    let dataEndpoint = `http://localhost:${dataInterfacePort}/${podId}/endpoint`;
+    async initialize(serverOptions: SolidServerOptions) {
+        let podId = serverOptions.podId;
 
-    const identityInterface = new IdentityInterface(serviceInfo, dataEndpoint)
-    await identityInterface.start(identityInterfacePort)
-    let webId = identityInterface.getWebId()
-    if (!webId) throw new Error('WebID could not be created.')
+        adminInterfacePort = serverOptions.adminInterfacePort || adminInterfacePort
+        authZInterfacePort = serverOptions.authZInterfacePort || authZInterfacePort
+        dataInterfacePort = serverOptions.dataInterfacePort || dataInterfacePort
+        logInterfacePort = serverOptions.logInterfacePort || logInterfacePort
+        identityInterfacePort = serverOptions.identityInterfacePort || identityInterfacePort
+        
+        // Setting up necessary stuff for the Pod server
+        let keyPair = await crypto.subtle.generateKey(
+            {
+                name: "ECDSA",
+                namedCurve: "P-384",
+            },
+            true,
+            ["sign", "verify"]
+        );
 
-    serviceInfo.webId = webId;
+        const IDPServerId = serverOptions.IDPServerId;
+        
+        let serviceInfo : ServiceInfo = {
+            podId, keyPair, webId: "", IDPServerId
+        }
 
+        let endpoints: EndpointInfo = {
+            dataEndpoint: `http://localhost:${dataInterfacePort}/${podId}/endpoint`,
+            authZEndpoint: `http://localhost:${authZInterfacePort}/`,
+            adminEndpoint: `http://localhost:${adminInterfacePort}/`,
+            logEndpoint: `http://localhost:${logInterfacePort}/`,
+            identityEndpoint: `http://localhost:${identityInterfacePort}/`,
+        }
 
-    // Components
-    const dataStorageComponent = new DataStorageComponent(serviceInfo);
+        let identityInterface;
+        let webId : string;
+        // if (!serverOptions.webId) {
+            identityInterface = new IdentityInterface(serviceInfo, endpoints)
+            await identityInterface.start(identityInterfacePort)
+            let maybeWebID = identityInterface.getWebId()
+            if (!maybeWebID) throw new Error('WebID could not be created.')
+            webId = maybeWebID
+            console.log('Please add the following line to your WebID. Make sure to remove any previous keys.')
 
-    await dataStorageComponent.addData(await prefetch(webId))
+            // Now we need to manually add the key to our WebID 
+            const keyString = await serializeCryptoKey(keyPair.publicKey)
+            console.log(`${webId} <http://www.w3.org/ns/auth/cert#key> "${keyString}".`)
+        // } else {
+        //     webId = serverOptions.webId;
+        // }
 
-    // Interfaces
-    const adminInterface = new AdminInterface(serviceInfo)
-    const authZInterface = new AuthZInterface(serviceInfo)
-    const logInterface = new LogInterface(serviceInfo)
-    const dataInterface = new DataInterface(serviceInfo, dataStorageComponent);
+        // Components
+        const dataStorageComponent = new DataStorageComponent(serviceInfo);
 
-    await adminInterface.start(adminInterfacePort)
-    await authZInterface.start(authZInterfacePort)
-    await logInterface.start(logInterfacePort)
-    await dataInterface.start(dataInterfacePort)
+        // Interfaces
+        const adminInterface = new AdminInterface(serviceInfo)
+        const authZInterface = new AuthZInterface(serviceInfo)
+        const logInterface = new LogInterface(serviceInfo)
+        const dataInterface = new DataInterface(serviceInfo, dataStorageComponent);
 
-    return [
-        adminInterface,
-        authZInterface,
-        logInterface,
-        dataInterface,
-    ]
+        await adminInterface.start(adminInterfacePort)
+        await authZInterface.start(authZInterfacePort)
+        await logInterface.start(logInterfacePort)
+        await dataInterface.start(dataInterfacePort)
+
+        this.components.set("dataStorageComponent", dataStorageComponent)
+        this.interfaces.set("adminInterface", adminInterface)
+        this.interfaces.set("authZInterface", authZInterface)
+        this.interfaces.set("logInterface", logInterface)
+        this.interfaces.set("dataInterface", dataInterface)
+        this.interfaces.set("identityInterface", identityInterface)
+
+        this.webId = webId;
+        this.keyPair = keyPair;
+    }
+
+    async close() {
+        await Promise.all((Array.from(this.interfaces.values())).map( i => i && i.stop()))
+    }
 }
-
-
-async function prefetch(webId: string) {
-    let quads: Quad[] = [];
-    // TODO:: authenticated requests??
-    quads = quads.concat(await n3toQuadArray( await (await fetch(`http://localhost:3456/flandersgov/endpoint/dob?id=${webId}`)).text() ) )
-    quads = quads.concat(await n3toQuadArray( await (await fetch(`http://localhost:3456/flandersgov/endpoint/name?id=${webId}`)).text() ) )
-    quads = quads.concat(await n3toQuadArray( await (await fetch(`http://localhost:3456/flandersgov/endpoint/address?id=${webId}`)).text() ) )
-    quads = quads.concat(await n3toQuadArray( await (await fetch(`http://localhost:3457/company/endpoint/licensekey?id=${webId}`)).text() ) )
-    quads = quads.concat(await n3toQuadArray( await (await fetch(`http://localhost:3457/company/endpoint/dob?id=${webId}`)).text() ) )
-
-    return quads
-} 
