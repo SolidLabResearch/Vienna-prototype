@@ -18,28 +18,51 @@ async function authenticatedFetch(config: {
     password: string,
     idp: string,
     tokenEndpoint?: string,
-    client: string
+    client: string,
+    webId: string,
 }): Promise<(input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>> {
     // fetch id and secret from the client credentials.
-    const {email, password, idp, client: appName} = config
-    const tokenUrl = config.tokenEndpoint ?? new URL(idp).origin + "/.oidc/token" // note: can retrieve it from {server}/.well-known/openid-configuration (e.g. http://localhost:3000/.well-known/openid-configuration)
-    const idpResponse = await fetch(idp)
+    const {email, password, idp, client: appName, webId} = config
+    console.log('CONFIG', config)
+
+    const idpControlsURI = idp+'.account/'
+
+    const IDPControls = await (await fetch (idpControlsURI)).json()
+    const loginInfo = await (await fetch (IDPControls.controls.password.login, {
+        method: "POST",
+        "headers": {
+            "Content-Type": "application/json"
+        }, body: JSON.stringify({email, password})
+    })).json()
+
+    let authorizationCode = loginInfo.authorization;
+    let authorizedControls = await (await fetch (idpControlsURI, {
+        headers: {
+            "Accept": "application/json",
+            "Authorization": `CSS-Account-Token ${authorizationCode}`
+        }
+    })).json()
+
 
     // only if 200
-    const idpjson: any = await idpResponse.json()
 
-    const credentialURL = idpjson.controls.credentials
     // throw error if undefined (credentialURL)
-    const credentialsResponse = await fetch(credentialURL, {
+    const credentialsResponse = await (await fetch(authorizedControls.controls.account.clientCredentials, {
         method: 'POST',
-        headers: {'content-type': 'application/json'},
-        body: JSON.stringify({email: email, password: password, name: appName}), 
-    });
+        headers: {
+            'content-type': 'application/json',
+            "Authorization": `CSS-Account-Token ${authorizationCode}`
+        },
+        body: JSON.stringify({name: appName, webId: webId}), 
+    })).json();
 
     // only if 200
-    const {id, secret} : {id: string, secret: string} = await credentialsResponse.json();
+    const {id, secret} : {id: string, secret: string} = credentialsResponse;
 
+    const wellKnown = await (await fetch(idp+'.well-known/openid-configuration')).json()
+    const tokenUrl = wellKnown.token_endpoint
 
+    console.log('tokenUrl', tokenUrl, wellKnown, idp+'.well-known/openid-configuration')
     // Requesting an access token.
     const dpopKey = await generateDpopKeyPair();
     const authString = `${encodeURIComponent(id)}:${encodeURIComponent(secret)}`;
@@ -76,7 +99,7 @@ async function getIdp(webID: string): Promise<string> {
     })
     const store = await turtleStringToStore(await response.text())
     const idp = store.getQuads(namedNode(webID), SOLID.terms.oidcIssuer, null, null)[0].object.value
-    return idp + 'idp/' // Note: don't know if that should or should not be added.
+    return idp //+ '.account/' //+ 'idp/' // Note: don't know if that should or should not be added.
 }
 
 /**
@@ -91,12 +114,12 @@ export async function getAuthenticatedSession(config: {
     password: string,
     client: string
 }): Promise<Session> {
-    const {email, password, client} = config
+    const {email, password, client, webId} = config
     const idp = await getIdp(config.webId);     // TODO: use getIdentityProvider from https://github.com/SolidLabResearch/SolidLabLib.js
     const session = new Session()
     try {
         // @ts-ignore
-        session.fetch = await authenticatedFetch({email, password, idp, client});
+        session.fetch = await authenticatedFetch({email, password, idp, client, webId});
         session.info.isLoggedIn = true
         session.info.webId = config.webId
         session.info.clientAppId = client

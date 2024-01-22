@@ -29,6 +29,7 @@
     "webpack": "^5.89.0"
   },
   "scripts": {
+    "fix": "bash fix/moveFile.sh",
     "test:start": "ts-node runAppFlow.ts",
     "test:serve": "ts-node runAllEndpoints.ts",
     "site:build-watch": "webpack --watch --config webpack.config.dev.js",

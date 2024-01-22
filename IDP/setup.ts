@@ -5,8 +5,10 @@ import { PublicInterface } from '../SolidPod/Interfaces/PublicInterface';
 export class IDPServer {
   
   app?: App;
+  port?: number;
 
   async start(port: number): Promise<void> {
+    this.port = port;
     // This creates an App, which can be used to start (and stop) a CSS instance
     this.app = await new AppRunner().create(
       {
@@ -43,5 +45,9 @@ export class IDPServer {
     if (this.app) await this.app.stop();
   }
 
+  getLocation() {
+    // TODO:: fix this
+    return `http://localhost:${this.port}/`
+  }
 }
 

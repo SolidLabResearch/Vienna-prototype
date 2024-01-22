@@ -64,7 +64,8 @@ export async function setupOnlyAPIs() {
   }
 }
 
-export async function setupIDP(port: number) {
+export async function setupIDP(port?: number) {
+  port = port || IDPServerPort
   const server = new IDPServer();
   await server.start(port);
   return server;

@@ -1,12 +1,13 @@
 import { Quad } from "n3";
 import { DataStorageComponent } from "./SolidPod/Components/Storage/DataStorageComponent";
-import { setup, setupOnlyAPIs, setupOnlyPod } from "./setup";
+import { setup, setupIDP, setupOnlyAPIs, setupOnlyPod } from "./setup";
 import { n3toQuadArray } from "./packaging/createSignedPackage";
 import { SolidLib } from "./SolidLib/Interface/SolidLib";
 import { readFileSync } from "fs"
 
 import { subtle, webcrypto } from 'crypto';
 import { createKeyPairFiles } from "./createKeys";
+import { linkAccountWithWebID } from "./IDP";
 
 async function run() {
     // Setup other APIs
@@ -15,9 +16,21 @@ async function run() {
     let userKeyPair = createKeyPairFiles('./test/userinfo/keys/steve-public.pem', './test/userinfo/keys/steve-private.pem')
     let storeKeyPair = createKeyPairFiles('./test/userinfo/keys/store-public.pem', './test/userinfo/keys/store-private.pem')
 
+    let IDPServer = await setupIDP()
+    let IDPServerLocation = IDPServer.getLocation();
+    // let idpServerLocation = "localhost:7834/"
+    const steveLoginInfo = JSON.parse(readFileSync("./test/userinfo/steve.json", {encoding: "utf-8"}))
+    const storeLoginInfo = JSON.parse(readFileSync("./test/userinfo/store.json", {encoding: "utf-8"})) 
+
+    // create account for steve at IDP
+    await linkAccountWithWebID(IDPServerLocation, steveLoginInfo)
+    // create account for store at IDP
+    await linkAccountWithWebID(IDPServerLocation, storeLoginInfo)
+
     // Create user Pod. 
     const stevePod = await setupOnlyPod({
         podId: "steve",
+        IDPServerId: IDPServerLocation,
         adminInterfacePort: 8060,
         authZInterfacePort: 8050,
         dataInterfacePort: 8040,
@@ -35,21 +48,22 @@ async function run() {
     // Add policy that birthDate can be retrieved by stores
     if (!stevePod.webId) throw new Error('WebID was not created')
 
-    const solidLib = new SolidLib("admin-App", stevePod.webId); // TODO:: discover steve endpoint from WebID
-    const loginInfo = JSON.parse(readFileSync("./test/userinfo/steve.json", {encoding: "utf-8"}))
-    await solidLib.login(loginInfo.webId, loginInfo.email, loginInfo.password) // Get endpoint through WebID
-    await solidLib.addPolicy(`
+    const SteveAdminSolidLib = new SolidLib("admin-App", stevePod.webId); // TODO:: discover steve endpoint from WebID
+    
+    await SteveAdminSolidLib.login(steveLoginInfo.webId, steveLoginInfo.email, steveLoginInfo.password) // Get endpoint through WebID
+    await SteveAdminSolidLib.addPolicy(`
 <myPolicy> <a> <Policy>;
     <subject> <food-store>;
     <action> <read>;
     <resource> <date_of_birth>;
     <context> <verification>.`)
 
-    await solidLib.logout();
+    await SteveAdminSolidLib.logout();
 
     // Create Store Pod
     const storePod = await setupOnlyPod({
         podId: "store",
+        IDPServerId: IDPServerLocation,
         adminInterfacePort: 7060,
         authZInterfacePort: 7050,
         dataInterfacePort: 7040,
@@ -66,12 +80,6 @@ async function run() {
 
     // Add policy that birthDate is required for alcoholic beverages
     
-
-
-
-
-
-
 
 
 

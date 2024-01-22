@@ -61,6 +61,7 @@ export class SolidLib {
             password,
             client: this.client
         })
+        console.log(session.info)
 
         if (session.info.isLoggedIn) {
             console.log(`[SolidLib]:login - Logged in.\n(web-id: ${session.info.webId} | client-id: ${session.info.clientAppId})`)

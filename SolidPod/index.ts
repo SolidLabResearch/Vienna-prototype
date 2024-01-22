@@ -105,11 +105,8 @@ export class SolidPod {
             let maybeWebID = identityInterface.getWebId()
             if (!maybeWebID) throw new Error('WebID could not be created.')
             webId = maybeWebID
-            console.log('Please add the following line to your WebID. Make sure to remove any previous keys.')
-
             // Now we need to manually add the key to our WebID 
             const keyString = await serializeCryptoKey(keyPair.publicKey)
-            console.log(`${webId} <http://www.w3.org/ns/auth/cert#key> "${keyString}".`)
         // } else {
         //     webId = serverOptions.webId;
         // }

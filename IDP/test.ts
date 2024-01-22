@@ -1,12 +1,9 @@
 import { IDPServer } from "./setup";
 
-
-
 async function run() {
+    let server = new IDPServer();
 
-    const idpServer = new IDPServer();
-
-    await idpServer.start(7834)
+    server.start(9983)
 
 
     const keypress = async () => {
@@ -16,15 +13,15 @@ async function run() {
         resolve()
         }))
     }
-    
+
     ;(async () => {
         await keypress()
     })().then(async() => {
         console.log('Endpoints closed by keypress')
-        await idpServer.stop();
+        await close();
         process.exit()
     })
-}
 
+}
 
 run()
