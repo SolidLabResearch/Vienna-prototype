@@ -1,6 +1,6 @@
 import { Quad } from "n3";
 import { DataStorageComponent } from "./SolidPod/Components/Storage/DataStorageComponent";
-import { setup, setupIDP, setupOnlyAPIs, setupOnlyPod } from "./setup";
+import { setup, setupIDP, setupOnlyAPIs, createPodAndIDPLink } from "./setup";
 import { n3toQuadArray } from "./packaging/createSignedPackage";
 import { SolidLib } from "./SolidLib/Interface/SolidLib";
 import { readFileSync } from "fs"
@@ -22,13 +22,9 @@ async function run() {
     const steveLoginInfo = JSON.parse(readFileSync("./test/userinfo/steve.json", {encoding: "utf-8"}))
     const storeLoginInfo = JSON.parse(readFileSync("./test/userinfo/store.json", {encoding: "utf-8"})) 
 
-    // create account for steve at IDP
-    await linkAccountWithWebID(IDPServerLocation, steveLoginInfo)
-    // create account for store at IDP
-    await linkAccountWithWebID(IDPServerLocation, storeLoginInfo)
 
     // Create user Pod. 
-    const stevePod = await setupOnlyPod({
+    const stevePod = await createPodAndIDPLink(steveLoginInfo, {
         podId: "steve",
         IDPServerId: IDPServerLocation,
         adminInterfacePort: 8060,
@@ -61,7 +57,7 @@ async function run() {
     await SteveAdminSolidLib.logout();
 
     // Create Store Pod
-    const storePod = await setupOnlyPod({
+    const storePod = await createPodAndIDPLink(storeLoginInfo, {
         podId: "store",
         IDPServerId: IDPServerLocation,
         adminInterfacePort: 7060,

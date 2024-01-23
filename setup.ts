@@ -1,5 +1,6 @@
 import { run as runCompanyAPI } from './ExternalServices/companyAPI'
 import { run as runFlandersAPI } from './ExternalServices/flandersAPI'
+import { linkAccountWithWebID } from './IDP'
 import { IDPServer } from './IDP/setup'
 import { LogStore, PolicyStore } from './SolidPod/Util/Storage'
 import { SolidPod, SolidServerOptions } from './SolidPod/index'
@@ -71,13 +72,21 @@ export async function setupIDP(port?: number) {
   return server;
 }
 
-export async function setupOnlyPod(options: SolidServerOptions) {
+export async function createPodAndIDPLink(userOptions: { webId: string, password: string, email: string}, podOptions: SolidServerOptions) {
+
+  console.log('######################################')
+  console.log('Setup IDP Account and Link')
+  console.log('######################################')
+  console.log('')
+    // create account for steve at IDP
+  await linkAccountWithWebID(podOptions.IDPServerId, userOptions)
+
   console.log('######################################')
   console.log('Setting up Pod Interfaces')
   console.log('######################################')
   console.log('')
   const pod = new SolidPod();
-  await pod.initialize(options)
+  await pod.initialize(podOptions)
 
   return pod;
 }
