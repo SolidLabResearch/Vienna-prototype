@@ -28,6 +28,7 @@ export class PackageStorageComponent extends Component {
      * note: This function removes all quads in the default graph that are not a package!
      */
     protected async addPackage(quads: Quad[]) {
+        // TODO:: why did I do this???
         let filteredQuads = quads.filter(q => !q.graph.equals(DataFactory.defaultGraph()) || q.predicate.value === packagePredicate)
         this.store.addQuads(filteredQuads);
     }

@@ -62,7 +62,6 @@ async function authenticatedFetch(config: {
     const wellKnown = await (await fetch(idp+'.well-known/openid-configuration')).json()
     const tokenUrl = wellKnown.token_endpoint
 
-    console.log('tokenUrl', tokenUrl, wellKnown, idp+'.well-known/openid-configuration')
     // Requesting an access token.
     const dpopKey = await generateDpopKeyPair();
     const authString = `${encodeURIComponent(id)}:${encodeURIComponent(secret)}`;

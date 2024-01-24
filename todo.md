@@ -88,6 +88,13 @@ ________________________________
 
 GET http://endpoint.org/?interface=TPF&subject=<WebID>&predicate=vcard:bday
 
+# Policy tagging
+```
+@prefix policy: <http://example.org/ns/policy/>.
+
+[] a policy:Policy.
+```
+
 
 
 <!-- 

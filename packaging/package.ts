@@ -31,19 +31,46 @@ type PackageOptions = {
 export async function packageContentFile(path: string, options: PackageOptions) {
     let n3string = fs.readFileSync(path, {encoding: "utf-8"});
     let quads = new Parser({ format: 'text/n3' }).parse(n3string);
-    return processContent(quads, options)
+    return processContentToString(quads, options)
+};
+
+export async function packageContentFileToN3Quads(path: string, options: PackageOptions) {
+    let n3string = fs.readFileSync(path, {encoding: "utf-8"});
+    let quads = new Parser({ format: 'text/n3' }).parse(n3string);
+    return processContentToN3Quads(quads, options)
 };
 
 export async function packageContentString(n3string: string, options: PackageOptions) { 
     let quads = new Parser({ format: 'text/n3' }).parse(n3string);
-    return processContent(quads, options)
+    return processContentToString(quads, options)
+}
+
+export async function packageContentStringToN3Quads(n3string: string, options: PackageOptions) { 
+    let quads = new Parser({ format: 'text/n3' }).parse(n3string);
+    return processContentToN3Quads(quads, options)
 }
 
 export async function packageContentQuads(quads: Quad[], options: PackageOptions) { 
+    return processContentToString(quads, options)
+}
+
+export async function packageContentQuadsToN3Quads(quads: Quad[], options: PackageOptions) { 
+    return processContentToN3Quads(quads, options)
+}
+
+async function processContentToString(quads: Quad[], options: PackageOptions): Promise<string> {
+    let packageN3Quads = await processContent(quads, options)
+    let stringResult = await write(packageN3Quads, {
+        format: 'text/n3'
+    })
+    return stringResult
+}
+
+async function processContentToN3Quads(quads: Quad[], options: PackageOptions): Promise<Quad[]> {
     return processContent(quads, options)
 }
 
-async function processContent(quads: Quad[], options: PackageOptions): Promise<string> {
+async function processContent(quads: Quad[], options: PackageOptions): Promise<Quad[]> {
     
     let packageGraph = DF.blankNode()
     let packageBlankNode = DF.blankNode();
@@ -68,11 +95,7 @@ async function processContent(quads: Quad[], options: PackageOptions): Promise<s
     packageQuads = packageQuads.concat(addSignature(packageBlankNode, packageGraph, options))
     packageQuads = packageQuads.concat(addCustomQuads(packageBlankNode, packageGraph, options))
 
-    let stringResult = await write(packageQuads, {
-        format: 'text/n3'
-    })
-
-    return stringResult
+    return packageQuads
 }
 
 function addProvenance(packageBlankNode: BlankNode, packageGraph: BlankNode, options: PackageOptions): Quad[] {

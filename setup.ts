@@ -15,8 +15,8 @@ export function clearStores() {
   console.log('######################################')
   console.log('')
   console.log('')
-  new PolicyStore().clear()
-  new LogStore().clear()
+  // new PolicyStore().clear()
+  // new LogStore().clear()
 }
 
 export async function setup(podId: string) {
