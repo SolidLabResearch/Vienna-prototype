@@ -321,7 +321,9 @@ export class SolidLib {
                 policy: preObligationRequest.value.policy
             }
 
-            agreements.push(agreement as Agreement);
+            // TODO:: fix this with quads
+
+            agreements.push([]) //agreement as Agreement;
 
             const agreementResponse = await this.session.fetch(interfaceEndpoints.authZ, {
                 method: "POST",

@@ -19,14 +19,19 @@ export class AdminInterface extends PublicInterface{
 
     public async start(port: number){
         this.app = express();
+        await this.startService()
 
-        this.startService(port)
+        this.server = this.app.listen(port, () => {
+            console.log(`Authorization Interface listening on ${port}`)
+            console.log(`URI: http://localhost:${port}/`)
+        })
     }
+
     public async stop() {
         this.server?.close();
     }
 
-    private async startService(port: number) {
+    private async startService() {
         if (!this.app) throw new Error("Coult not start service. Server setup was not finished.")
         this.app.use(bodyParser.text({ type: 'text/turtle' }));
 
@@ -72,10 +77,5 @@ export class AdminInterface extends PublicInterface{
                 .contentType("application/json")
                 .send({ info: "Policy added" })
         })
-
-        this.server = this.app.listen(port, () => {
-            console.log(`Authorization Interface listening on ${port}`)
-            console.log(`URI: http://localhost:${port}/`)
-          })
     }
 }

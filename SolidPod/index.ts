@@ -11,6 +11,7 @@ import { PublicInterface } from './Interfaces/PublicInterface'
 
 import crypto from "crypto"
 import { PolicyStorageComponent } from './Components/Storage/PolicyStorageComponent'
+import { LogStorageComponent } from './Components/Storage/LogStorageComponent'
 
 
 
@@ -115,11 +116,13 @@ export class SolidPod {
         // Components
         const dataStorageComponent = new DataStorageComponent(serviceInfo);
         const policyStorageComponent = new PolicyStorageComponent(serviceInfo);
+        const logStorageComponent = new LogStorageComponent(serviceInfo);
+
 
         // Interfaces
         const adminInterface = new AdminInterface(serviceInfo, policyStorageComponent)
-        const authZInterface = new AuthZInterface(serviceInfo)
-        const logInterface = new LogInterface(serviceInfo)
+        const authZInterface = new AuthZInterface(serviceInfo, policyStorageComponent)
+        const logInterface = new LogInterface(serviceInfo, logStorageComponent)
         const dataInterface = new DataInterface(serviceInfo, dataStorageComponent);
 
         await adminInterface.start(adminInterfacePort)
@@ -128,6 +131,8 @@ export class SolidPod {
         await dataInterface.start(dataInterfacePort)
 
         this.components.set("dataStorageComponent", dataStorageComponent)
+        this.components.set("policyStorageComponent", policyStorageComponent)
+        this.components.set("logStorageComponent", logStorageComponent)
         this.interfaces.set("adminInterface", adminInterface)
         this.interfaces.set("authZInterface", authZInterface)
         this.interfaces.set("logInterface", logInterface)

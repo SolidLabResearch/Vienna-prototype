@@ -1,3 +1,5 @@
+import { Quad } from "n3";
+
 export type Query = any;
 
 export type Session = {
@@ -27,14 +29,7 @@ export type DataPlusPlus = {
     data: DataPlus,
 }
 
-export type Agreement = {
-    owner: string
-    ownerSignature: Signature,
-    consumer: string,
-    consumerSignature: Signature,
-    policy: InstantiatedPolicy;
-
-}
+export type Agreement = Quad[]
 
 // export type DataPlus = {
 //     dataSignature: string,

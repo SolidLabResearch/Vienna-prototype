@@ -13,14 +13,14 @@ async function run() {
     // Setup other APIs
     const closeOtherAPIs = await setupOnlyAPIs()
 
-    let userKeyPair = createKeyPairFiles('./test/userinfo/keys/steve-public.pem', './test/userinfo/keys/steve-private.pem')
-    let storeKeyPair = createKeyPairFiles('./test/userinfo/keys/store-public.pem', './test/userinfo/keys/store-private.pem')
+    let userKeyPair = createKeyPairFiles('./test/userinfo/steve/keys/public.pem', './test/userinfo/steve/keys/private.pem')
+    let storeKeyPair = createKeyPairFiles('./test/userinfo/store/keys/public.pem', './test/userinfo/store/keys/private.pem')
 
     let IDPServer = await setupIDP()
     let IDPServerLocation = IDPServer.getLocation();
     // let idpServerLocation = "localhost:7834/"
-    const steveLoginInfo = JSON.parse(readFileSync("./test/userinfo/steve.json", {encoding: "utf-8"}))
-    const storeLoginInfo = JSON.parse(readFileSync("./test/userinfo/store.json", {encoding: "utf-8"})) 
+    const steveLoginInfo = JSON.parse(readFileSync("./test/userinfo/steve/authn.json", {encoding: "utf-8"}))
+    const storeLoginInfo = JSON.parse(readFileSync("./test/userinfo/store/authn.json", {encoding: "utf-8"})) 
 
 
     // Create user Pod. 
